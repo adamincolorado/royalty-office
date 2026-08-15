@@ -1,17 +1,23 @@
+"use client";
+
 /**
- * Mock satellite change-detection pair — CSS/SVG rendering, clearly labeled a
- * demo. Production serves real Sentinel-2 chips (and, on subscriber tracts,
- * commercial high-res) from the imagery pipeline.
+ * Satellite comparison slider — drag the divider to wipe between the two
+ * passes. Pointer events unify mouse and touch; `touch-action: pan-y` lets
+ * vertical page scroll pass through while horizontal drags drive the wipe.
+ * Keyboard: arrow keys. The tiles are CSS/SVG mock renderings, clearly
+ * labeled demo; production serves real chips from the imagery pipeline.
  */
+import { useCallback, useRef, useState } from "react";
+
 function Scrub({ seedOffset = 0 }: { seedOffset?: number }) {
-  // deterministic pseudo-random scrub dots
   const dots = Array.from({ length: 90 }, (_, i) => {
     const a = Math.sin(i * 12.9898 + seedOffset) * 43758.5453;
     const b = Math.sin(i * 78.233 + seedOffset) * 12543.1231;
-    const x = (a - Math.floor(a)) * 200;
-    const y = (b - Math.floor(b)) * 200;
-    const r = 1 + ((i * 7 + seedOffset) % 3);
-    return { x, y, r };
+    return {
+      x: (a - Math.floor(a)) * 200,
+      y: (b - Math.floor(b)) * 200,
+      r: 1 + ((i * 7 + seedOffset) % 3),
+    };
   });
   return (
     <>
@@ -22,46 +28,100 @@ function Scrub({ seedOffset = 0 }: { seedOffset?: number }) {
   );
 }
 
+function Tile({ after = false }: { after?: boolean }) {
+  return (
+    <svg viewBox="0 0 200 200" className="block h-full w-full" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+      <rect width="200" height="200" fill="#8A9271" />
+      <rect width="200" height="200" fill="#75805C" opacity="0.5" />
+      <Scrub seedOffset={after ? 3 : 0} />
+      <path d="M0 148 Q60 138 118 152 T200 144" fill="none" stroke="#6E7A57" strokeWidth="5" opacity="0.7" />
+      {after && (
+        <>
+          <path d="M0 60 L74 84" stroke="#C9BFA0" strokeWidth="6" strokeLinecap="round" />
+          <rect x="70" y="72" width="72" height="52" fill="#CFC5A5" transform="rotate(-8 106 98)" />
+          <rect x="70" y="72" width="72" height="52" fill="none" stroke="#A87B2F" strokeWidth="2.5"
+            strokeDasharray="6 4" transform="rotate(-8 106 98)" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export function SatelliteTiles() {
+  const [pct, setPct] = useState(46);
+  const [active, setActive] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const moveTo = useCallback((clientX: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setPct(Math.min(96, Math.max(4, ((clientX - r.left) / r.width) * 100)));
+  }, []);
+
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3">
-        {/* before */}
-        <figure>
-          <svg viewBox="0 0 200 200" className="w-full rounded-sm border border-line" role="img"
-            aria-label="Satellite tile, July 28 pass: undisturbed scrubland">
-            <rect width="200" height="200" fill="#8A9271" />
-            <rect width="200" height="200" fill="#75805C" opacity="0.5" />
-            <Scrub />
-            <path d="M0 148 Q60 138 118 152 T200 144" fill="none" stroke="#6E7A57" strokeWidth="5" opacity="0.7" />
-            <text x="8" y="192" fontSize="11" fill="#F7F4EC" fontFamily="var(--font-mono)" opacity="0.95">JUL 28</text>
-          </svg>
-          <figcaption className="mt-1 text-[11px] text-ink-3">Previous pass — undisturbed</figcaption>
-        </figure>
-        {/* after */}
-        <figure>
-          <svg viewBox="0 0 200 200" className="w-full rounded-sm border border-brass" role="img"
-            aria-label="Satellite tile, August 12 pass: cleared rectangular pad and new access road, flagged by change detection">
-            <rect width="200" height="200" fill="#8A9271" />
-            <rect width="200" height="200" fill="#75805C" opacity="0.5" />
-            <Scrub seedOffset={3} />
-            <path d="M0 148 Q60 138 118 152 T200 144" fill="none" stroke="#6E7A57" strokeWidth="5" opacity="0.7" />
-            {/* access road */}
-            <path d="M0 60 L74 84" stroke="#C9BFA0" strokeWidth="6" strokeLinecap="round" />
-            {/* cleared pad */}
-            <rect x="70" y="72" width="72" height="52" fill="#CFC5A5" transform="rotate(-8 106 98)" />
-            <rect x="70" y="72" width="72" height="52" fill="none" stroke="#A87B2F" strokeWidth="2.5"
-              strokeDasharray="6 4" transform="rotate(-8 106 98)" />
-            <text x="8" y="192" fontSize="11" fill="#F7F4EC" fontFamily="var(--font-mono)" opacity="0.95">AUG 12</text>
-          </svg>
-          <figcaption className="mt-1 text-[11px] font-medium text-brass-deep">
-            Change detected — cleared pad + access road
-          </figcaption>
-        </figure>
+      <div
+        ref={ref}
+        role="slider"
+        tabIndex={0}
+        aria-label="Compare satellite passes: July 28 versus August 12"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(pct)}
+        className="relative aspect-square w-full cursor-ew-resize touch-pan-y select-none overflow-hidden rounded-[4px] border border-line focus:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+        onPointerDown={(e) => {
+          try {
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          } catch {
+            /* synthetic or already-released pointer — capture is best-effort */
+          }
+          setActive(true);
+          moveTo(e.clientX);
+        }}
+        onPointerMove={(e) => {
+          if (active) moveTo(e.clientX);
+        }}
+        onPointerUp={() => setActive(false)}
+        onPointerCancel={() => setActive(false)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") { setPct((p) => Math.max(4, p - 4)); e.preventDefault(); }
+          if (e.key === "ArrowRight") { setPct((p) => Math.min(96, p + 4)); e.preventDefault(); }
+        }}
+      >
+        {/* before layer */}
+        <div className="absolute inset-0"><Tile /></div>
+        {/* after layer, revealed right of the divider */}
+        <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${pct}%)` }}>
+          <Tile after />
+        </div>
+
+        {/* corner labels */}
+        <span className="figures pointer-events-none absolute bottom-2 left-2 rounded-sm bg-pine-deep/70 px-1.5 py-0.5 text-[10.5px] font-semibold text-paper">
+          JUL 28
+        </span>
+        <span className="figures pointer-events-none absolute bottom-2 right-2 rounded-sm bg-brass px-1.5 py-0.5 text-[10.5px] font-bold text-pine-deep">
+          AUG 12
+        </span>
+
+        {/* divider + grip */}
+        <div className="pointer-events-none absolute inset-y-0" style={{ left: `${pct}%` }}>
+          <div className="absolute inset-y-0 -ml-px w-0.5 bg-paper shadow-[0_0_6px_rgba(8,26,21,0.6)]" />
+          <div
+            className={`absolute top-1/2 -ml-[17px] -mt-[17px] flex h-[34px] w-[34px] items-center justify-center rounded-full border border-line bg-paper-card shadow-card transition-transform ${active ? "scale-110" : ""}`}
+          >
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
+              <path d="M5 1 1 6l4 5M11 1l4 5-4 5" fill="none" stroke="#14342B" strokeWidth="1.8"
+                strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-ink-3">
-        Sentinel-2 · 10 m/px · demo rendering. Production shows the real chips,
-        with commercial high-res on subscriber tracts.
+        <strong className="text-brass-deep">Drag to compare.</strong>{" "}
+        Change flagged Aug 12 — cleared pad + access road. Sentinel-2 ·
+        10 m/px · demo rendering; production shows real chips, with commercial
+        high-res on subscriber tracts.
       </p>
     </div>
   );

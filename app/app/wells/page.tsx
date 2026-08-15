@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { StatusPill } from "@/components/StatusPill";
+import { Sparkline } from "@/components/charts/Sparkline";
 import { getDeck, ownerPositions } from "@/lib/data";
 import { forecastNet, historyNet, sumNet } from "@/lib/cashflow";
 import { money } from "@/lib/format";
+
+const boe12 = (hist: { oil: number; gas: number }[]) =>
+  hist.slice(-12).map((m) => m.oil + m.gas / 6);
 
 export const metadata = { title: "Your wells" };
 
@@ -30,6 +34,7 @@ export default function WellsPage() {
               <th className="table-th">Operator</th>
               <th className="table-th">County</th>
               <th className="table-th">Status</th>
+              <th className="table-th">12-mo trend</th>
               <th className="table-th text-right">Your decimal</th>
               <th className="table-th text-right">Trailing 12 mo</th>
               <th className="table-th text-right">Next 12 mo at strip</th>
@@ -53,6 +58,7 @@ export default function WellsPage() {
                 </td>
                 <td className="table-td text-[13.5px] text-ink-2">{r.well.county}</td>
                 <td className="table-td"><StatusPill status={r.well.status} /></td>
+                <td className="table-td"><Sparkline vals={boe12(r.well.hist)} /></td>
                 <td className="table-td figures text-right text-[13px]">{r.interest.decimal.toFixed(8)}</td>
                 <td className="table-td figures text-right">{money(r.ttm)}</td>
                 <td className="table-td figures text-right font-semibold text-pine">{money(r.next12)}</td>

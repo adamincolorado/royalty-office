@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CashflowChart } from "@/components/charts/CashflowChart";
+import { Sparkline } from "@/components/charts/Sparkline";
 import { StatusPill } from "@/components/StatusPill";
 import { getAlerts, getDeck, getOperators, getOwner, ownerPositions } from "@/lib/data";
 import { forecastNet, historyNet, mergeSeries, sumNet } from "@/lib/cashflow";
@@ -134,7 +135,7 @@ export default function Dashboard() {
               <tr>
                 <th className="table-th">Well</th>
                 <th className="table-th">Status</th>
-                <th className="table-th text-right">Your decimal</th>
+                <th className="table-th">12-mo trend</th>
                 <th className="table-th text-right">Next 12 mo</th>
               </tr>
             </thead>
@@ -148,7 +149,9 @@ export default function Dashboard() {
                     <span className="block text-[11.5px] text-ink-3">{p.well.county} · {p.well.formation}</span>
                   </td>
                   <td className="table-td"><StatusPill status={p.well.status} /></td>
-                  <td className="table-td figures text-right text-[13px]">{p.interest.decimal.toFixed(8)}</td>
+                  <td className="table-td">
+                    <Sparkline vals={p.well.hist.slice(-12).map((m) => m.oil + m.gas / 6)} width={80} height={24} />
+                  </td>
                   <td className="table-td figures text-right font-semibold text-pine">{money(p.next12)}</td>
                 </tr>
               ))}
