@@ -62,7 +62,7 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-3 py-4">
                 {[
                   ["Trailing 12 mo", "$120,262"],
-                  ["Next 12 mo at strip", "$104,403"],
+                  ["Next 12 mo, modeled", "$104,403"],
                   ["Producing wells", "19 of 20"],
                 ].map(([k, v]) => (
                   <div key={k} className="rounded-[4px] border border-line-soft bg-paper px-3 py-2.5">
@@ -152,7 +152,7 @@ export default function Home() {
             },
             {
               t: "What's coming next?",
-              d: "Engineering-grade decline forecasts priced at the futures strip — never speculation. Three months, six, twelve, or three years out, per well or across everything you own.",
+              d: "Engineering-grade decline forecasts priced at the EIA's published energy outlook — never our speculation. Three months, six, twelve, or three years out, per well or across everything you own.",
             },
           ].map((c, i) => (
             <Reveal key={c.t} delay={i * 90}>
@@ -192,7 +192,7 @@ export default function Home() {
               {
                 n: "3",
                 t: "See everything",
-                d: "Wells, cashflow history, and forward projections at strip prices. In plain English by default — with a pro mode when you want the full detail.",
+                d: "Wells, cashflow history, and forward projections at published reference prices. In plain English by default — with a pro mode when you want the full detail.",
               },
             ].map((s, i) => (
               <Reveal key={s.n} delay={i * 110}>
@@ -242,7 +242,7 @@ export default function Home() {
               <ul className="mt-5 space-y-5">
                 {[
                   ["Public sources only", "RRC, county rolls, GLO, FracFocus — never private data about you."],
-                  ["Strip prices, not speculation", "Forecasts are priced at the published futures curve, clearly dated. We never predict prices."],
+                  ["Published prices, not our speculation", "Forecasts are priced at the EIA Short-Term Energy Outlook — a public federal reference, clearly dated. We never predict prices ourselves."],
                   ["Straight about who we are", "Royalty Office is operated by Alamo Exploration LLC, whose affiliates buy and lease minerals. We never sell your data to third parties, and our disclosures say exactly how we use it."],
                   ["Not investment advice", "We show you the math. Decisions — and the professionals you hire for them — are yours."],
                 ].map(([t, d]) => (

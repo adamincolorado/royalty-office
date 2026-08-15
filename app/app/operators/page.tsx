@@ -34,7 +34,7 @@ export default function OperatorsPage() {
               {[
                 ["Your wells", `${num(r.wells)} (${num(r.producing)} producing)`],
                 ["Trailing 12 mo, net", money(r.ttm)],
-                ["Next 12 mo at strip", money(r.next12)],
+                ["Next 12 mo, modeled", money(r.next12)],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-baseline justify-between">
                   <dt className="text-[12.5px] text-ink-3">{k}</dt>

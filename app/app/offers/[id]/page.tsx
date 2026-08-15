@@ -69,7 +69,7 @@ export default function OfferPage({ params }: { params: { id: string } }) {
           </p>
           <p className="figures mt-2 text-3xl font-semibold text-ink">{money(theirs)}</p>
           <p className="mt-1.5 text-[13px] text-ink-3">
-            {mult(theirs, next12)} your next-12-month cashflow at strip
+            {mult(theirs, next12)} your next-12-month modeled cashflow
           </p>
         </div>
         <div className="card relative overflow-hidden border-pine p-5 ring-1 ring-pine/40 sm:p-6">
@@ -78,7 +78,7 @@ export default function OfferPage({ params }: { params: { id: string } }) {
           </p>
           <p className="figures mt-2 text-3xl font-semibold text-pine">{money(ours)}</p>
           <p className="mt-1.5 text-[13px] text-ink-2">
-            {mult(ours, next12)} your next-12-month cashflow at strip ·{" "}
+            {mult(ours, next12)} your next-12-month modeled cashflow ·{" "}
             <strong className="text-pine">{money(diff)} more</strong>
           </p>
         </div>
@@ -110,13 +110,13 @@ export default function OfferPage({ params }: { params: { id: string } }) {
                 <td className="table-td figures text-right font-semibold text-pine">{mult(ours, ttm)}</td>
               </tr>
               <tr>
-                <td className="table-td">Next 12 mo at strip</td>
+                <td className="table-td">Next 12 mo, modeled</td>
                 <td className="table-td figures text-right">{money(next12)}</td>
                 <td className="table-td figures text-right">{mult(theirs, next12)}</td>
                 <td className="table-td figures text-right font-semibold text-pine">{mult(ours, next12)}</td>
               </tr>
               <tr>
-                <td className="table-td">Next 36 mo at strip</td>
+                <td className="table-td">Next 36 mo, modeled</td>
                 <td className="table-td figures text-right">{money(next36)}</td>
                 <td className="table-td figures text-right">{mult(theirs, next36)}</td>
                 <td className="table-td figures text-right font-semibold text-pine">{mult(ours, next36)}</td>
@@ -126,8 +126,8 @@ export default function OfferPage({ params }: { params: { id: string } }) {
         </div>
         <p className="mt-3 text-[12.5px] leading-relaxed text-ink-3">
           Multiples are the offer divided by each model figure. The model is
-          the same decline-curve, strip-priced estimate shown throughout your
-          account — an estimate, not a valuation. A &ldquo;fair&rdquo;
+          the same decline-curve estimate at published reference prices shown
+          throughout your account — an estimate, not a valuation. A &ldquo;fair&rdquo;
           multiple depends on decline, development upside, and your own
           situation; that judgment is yours and your advisors&rsquo;, not ours.
         </p>

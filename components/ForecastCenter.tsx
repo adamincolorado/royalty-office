@@ -65,7 +65,7 @@ export function ForecastCenter({
             Cashflow &amp; forecast
           </h1>
           <p className="mt-1 text-[13px] text-ink-3">
-            Decline-model volumes × strip prices × your decimals. Nothing speculative.
+            Decline-model volumes × published reference prices × your decimals. Nothing speculative.
           </p>
         </div>
         <div className="flex rounded-sm border border-line bg-paper-card p-1" role="tablist" aria-label="Forecast horizon">

@@ -76,7 +76,7 @@ export default function PublicWellPage({ params }: { params: { api: string } }) 
             <h2 className="font-display text-xl font-semibold">Own a piece of this well?</h2>
             <p className="mt-1 max-w-xl text-[14px] text-ink-2">
               Subscribers see this same record netted to their decimal — what it
-              has paid, month by month, and what it should pay next at strip prices.
+              has paid, month by month, and what it should pay next at published reference prices.
             </p>
           </div>
           <Link href="/claim" className="btn-primary">Claim your card</Link>

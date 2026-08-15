@@ -27,7 +27,7 @@ const tiers = [
     features: [
       "Everything in Claimed",
       "Net cashflow history, priced to your decimal",
-      "Forecasts at strip — 3, 6, 12, 36 months",
+      "Forecasts at published reference prices — 3, 6, 12, 36 months",
       "Well detail with decline models",
       "Check-stub upload: modeled vs. actual",
       "Annual owner report (PDF)",

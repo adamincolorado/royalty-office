@@ -96,7 +96,7 @@ export function CashflowChart({
           <rect x={splitX} y={padT - 4} width={W - 4 - splitX} height={H - padT - padB + 8} fill="#A87B2F" opacity="0.05" />
           <line x1={splitX} x2={splitX} y1={padT - 4} y2={H - padB + 4} stroke="#A87B2F" strokeWidth="1" strokeDasharray="4 3" />
           <text x={splitX + 6} y={padT + 6} fontSize={compact ? 9 : 9.5} fill="#8A6323" fontWeight="600" letterSpacing="1.2" fontFamily="var(--font-sans)">
-            {compact ? "FORECAST" : "FORECAST AT STRIP"}
+            {compact ? "FORECAST" : "MODELED FORECAST"}
           </text>
         </>
       )}

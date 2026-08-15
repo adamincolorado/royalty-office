@@ -46,7 +46,7 @@ export default function AppWellPage({ params }: { params: { api: string } }) {
         {[
           ["Your decimal", interest.decimal.toFixed(8), interest.type === "RI" ? "royalty interest" : "overriding royalty"],
           ["Trailing 12 mo, net", money(ttm), "modeled at demo deck"],
-          ["Next 12 mo at strip", money(next12), `deck as of ${deck.asOf}`],
+          ["Next 12 mo, modeled", money(next12), `deck as of ${deck.asOf}`],
           ["First production", monthLabel(well.firstProd), `data through ${monthLabel(well.lastReported)}`],
         ].map(([k, v, d]) => (
           <div key={k as string} className="card px-5 py-4">

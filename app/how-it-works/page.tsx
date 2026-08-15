@@ -28,7 +28,7 @@ export default function HowItWorks() {
             },
             {
               t: "4. See what's coming",
-              d: "Every producing well carries an engineering-grade decline model — the same modified-Arps convention reserve engineers use. Forward volumes are priced at the published futures strip, dated, with severance tax and typical deductions netted out. Pick a horizon — three months to three years — per well, per operator, or across everything you own. We model volumes; we never predict prices.",
+              d: "Every producing well carries an engineering-grade decline model — the same modified-Arps convention reserve engineers use. Forward volumes are priced at the U.S. Energy Information Administration's published Short-Term Energy Outlook — a dated, public reference forecast — with severance tax and typical deductions netted out. Pick a horizon — three months to three years — per well, per operator, or across everything you own. We model volumes; we never predict prices.",
             },
             {
               t: "5. Let the alerts watch for you",

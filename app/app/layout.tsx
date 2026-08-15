@@ -20,7 +20,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col">
       {/* demo ribbon */}
       <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
-        DEMO — fictional owner, fictional wells, demo strip. Data through {latestMonth()}.
+        DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.
       </div>
 
       <header className="border-b border-line bg-paper-card">

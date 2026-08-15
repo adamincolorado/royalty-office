@@ -37,7 +37,7 @@ export default function WellsPage() {
               <th className="table-th">12-mo trend</th>
               <th className="table-th text-right">Your decimal</th>
               <th className="table-th text-right">Trailing 12 mo</th>
-              <th className="table-th text-right">Next 12 mo at strip</th>
+              <th className="table-th text-right">Next 12 mo, modeled</th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +69,7 @@ export default function WellsPage() {
       </div>
       <p className="mt-3 text-[12.5px] text-ink-3">
         Trailing figures are modeled from reported production at the demo deck;
-        forward figures are decline forecasts priced at strip. Upload statements
+        forward figures are decline forecasts priced at the published deck. Upload statements
         (Owner plan) to replace models with actuals.
       </p>
     </div>

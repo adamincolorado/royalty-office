@@ -45,7 +45,7 @@ export default function Dashboard() {
         <div className="card relative col-span-3 overflow-hidden border-brass/60 px-5 py-4 ring-1 ring-brass/30 lg:col-span-1">
           <div className="hairline-brass absolute inset-x-0 top-0" aria-hidden="true" />
           <p className="text-[11px] font-semibold uppercase tracking-wider text-brass-deep">
-            Next 12 months at strip
+            Next 12 months, modeled
           </p>
           <p className="figures mt-1.5 text-[34px] font-semibold leading-none text-pine lg:text-[26px]">
             {money(next12)}
