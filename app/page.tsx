@@ -49,8 +49,8 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-3 gap-3 py-4">
                 {[
-                  ["Trailing 12 mo", "$38,410"],
-                  ["Next 12 mo at strip", "$31,270"],
+                  ["Trailing 12 mo", "$120,262"],
+                  ["Next 12 mo at strip", "$104,403"],
                   ["Producing wells", "19 of 20"],
                 ].map(([k, v]) => (
                   <div key={k} className="rounded-sm border border-line-soft bg-paper px-3 py-2.5">

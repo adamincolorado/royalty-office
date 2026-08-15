@@ -74,18 +74,24 @@ export default function AppWellPage({ params }: { params: { api: string } }) {
           <h2 className="font-display text-xl font-semibold">Production &amp; decline model</h2>
           <p className="text-[12px] text-ink-3">gross, lease-allocated</p>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 hidden sm:block">
           <ProductionChart hist={well.hist} forecast={forecastGross(well, 12)} />
+        </div>
+        <div className="mt-3 sm:hidden">
+          <ProductionChart compact hist={well.hist.slice(-12)} forecast={forecastGross(well, 6)} />
         </div>
       </div>
 
-      <div className="card mt-6 p-5">
+      <div className="card mt-6 p-4 sm:p-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-xl font-semibold">Your share, in dollars</h2>
+          <h2 className="font-display text-lg font-semibold sm:text-xl">Your share, in dollars</h2>
           <p className="text-[12px] text-ink-3">net of severance &amp; modeled deducts</p>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 hidden sm:block">
           <CashflowChart history={histNet} forecast={fcNet} height={200} />
+        </div>
+        <div className="mt-3 sm:hidden">
+          <CashflowChart compact history={histNet.slice(-12)} forecast={fcNet.slice(0, 6)} />
         </div>
       </div>
 

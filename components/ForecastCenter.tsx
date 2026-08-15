@@ -23,10 +23,10 @@ interface DeckView {
 }
 
 const HORIZONS = [
-  { key: 3, label: "3 months" },
-  { key: 6, label: "6 months" },
-  { key: 12, label: "12 months" },
-  { key: 36, label: "36 months" },
+  { key: 3, label: "3 months", short: "3 mo" },
+  { key: 6, label: "6 months", short: "6 mo" },
+  { key: 12, label: "12 months", short: "12 mo" },
+  { key: 36, label: "36 months", short: "36 mo" },
 ];
 
 export function ForecastCenter({
@@ -76,11 +76,12 @@ export function ForecastCenter({
               aria-selected={horizon === h.key}
               onClick={() => setHorizon(h.key)}
               className={cn(
-                "rounded-[2px] px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
+                "rounded-[2px] px-3 py-2 text-[13px] font-semibold transition-colors sm:px-3.5 sm:py-1.5",
                 horizon === h.key ? "bg-pine text-paper" : "text-ink-2 hover:bg-paper-deep",
               )}
             >
-              {h.label}
+              <span className="sm:hidden">{h.short}</span>
+              <span className="hidden sm:inline">{h.label}</span>
             </button>
           ))}
         </div>

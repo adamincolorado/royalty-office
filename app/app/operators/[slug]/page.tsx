@@ -40,8 +40,11 @@ export default function AppOperatorPage({ params }: { params: { slug: string } }
           <h2 className="font-display text-xl font-semibold">Net cashflow from {op.name}</h2>
           <p className="text-[12px] text-ink-3">your {mine.length} wells with this operator</p>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 hidden sm:block">
           <CashflowChart history={hist} forecast={fc} height={200} />
+        </div>
+        <div className="mt-3 sm:hidden">
+          <CashflowChart compact history={hist.slice(-12)} forecast={fc.slice(0, 6)} />
         </div>
       </div>
 

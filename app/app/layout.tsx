@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Wordmark } from "@/components/Brand";
+import { Seal, Wordmark } from "@/components/Brand";
 import { getOwner, latestMonth } from "@/lib/data";
 import { AppNav } from "@/components/AppNav";
 
@@ -24,14 +24,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       <header className="border-b border-line bg-paper-card">
-        <div className="mx-auto flex max-w-wrap items-center justify-between px-5 py-3">
-          <div className="flex items-center gap-6">
-            <Wordmark />
-            <span className="hidden rounded-full bg-pine-soft px-3 py-1 text-[12px] font-semibold text-pine md:inline">
-              {owner.name}
+        <div className="mx-auto flex max-w-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+            {/* seal only on phones; full wordmark from sm up */}
+            <Link href="/" className="sm:hidden" aria-label="Royalty Office — home">
+              <Seal size={30} />
+            </Link>
+            <Wordmark className="hidden sm:flex" />
+            <span className="min-w-0 truncate rounded-full bg-pine-soft px-3 py-1 text-[12px] font-semibold text-pine">
+              <span className="md:hidden">{owner.shortName}</span>
+              <span className="hidden md:inline">{owner.name}</span>
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-3.5 sm:gap-4">
             <Link href="/app/settings" className="text-sm font-medium text-ink-2 hover:text-ink">
               Settings
             </Link>

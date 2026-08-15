@@ -14,24 +14,31 @@ const tabs = [
 export function AppNav() {
   const path = usePathname();
   return (
-    <nav className="mx-auto flex max-w-wrap gap-1 overflow-x-auto px-5">
-      {tabs.map((t) => {
-        const active = t.exact ? path === t.href : path.startsWith(t.href);
-        return (
-          <Link
-            key={t.href}
-            href={t.href}
-            className={cn(
-              "whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "border-brass font-semibold text-ink"
-                : "border-transparent text-ink-3 hover:border-line hover:text-ink",
-            )}
-          >
-            {t.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="relative">
+      <nav className="no-scrollbar mx-auto flex max-w-wrap gap-1 overflow-x-auto px-4 sm:px-5">
+        {tabs.map((t) => {
+          const active = t.exact ? path === t.href : path.startsWith(t.href);
+          return (
+            <Link
+              key={t.href}
+              href={t.href}
+              className={cn(
+                "whitespace-nowrap border-b-2 px-3.5 py-3 text-sm font-medium transition-colors sm:py-2.5",
+                active
+                  ? "border-brass font-semibold text-ink"
+                  : "border-transparent text-ink-3 hover:border-line hover:text-ink",
+              )}
+            >
+              {t.label}
+            </Link>
+          );
+        })}
+      </nav>
+      {/* right-edge fade hints at horizontal scroll on phones */}
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-paper-card to-transparent sm:hidden"
+        aria-hidden="true"
+      />
+    </div>
   );
 }
