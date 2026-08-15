@@ -246,8 +246,8 @@ const deck = {
 const alerts = [
   {
     id: "AL-1", date: "2026-08-02", kind: "permit",
-    title: "New permit within 1 mile of RANCHERO STATE UNIT",
-    body: "Calloway Operating filed a new drilling permit (Wolfcamp A, 10,400 ft lateral) one mile southwest of your Ranchero State Unit wells. New wells on or near your acreage can mean new revenue — or temporary shut-ins while offsets are completed.",
+    title: "New well permitted on your RANCHERO STATE UNIT — 5H",
+    body: "Calloway Operating filed a drilling permit for a fifth well on the Ranchero State Unit (Wolfcamp A, 10,400 ft planned lateral). You already collect on this unit, so a completed 5H would mean a new revenue stream. Follow its progress on the Monitoring tab.",
     api: null, county: "reeves",
   },
   {
@@ -264,6 +264,66 @@ const alerts = [
   },
 ];
 
+// ---- well events (the monitoring feed) -------------------------------------
+// Detected events carry the public source and a match-confidence tier; the
+// projected tail of a lifecycle is labeled projected and drawn dashed.
+const events = [
+  {
+    id: "EV-1", api: null, wellName: "RANCHERO STATE UNIT 5H", county: "Reeves",
+    date: "2026-08-02", kind: "permit_filed", source: "RRC W-1 (daily diff)",
+    confidence: "unit", projected: false,
+    title: "Drilling permit filed",
+    detail: "Calloway Operating permitted a fifth Wolfcamp A well on your unit — 10,400 ft planned lateral.",
+  },
+  {
+    id: "EV-2", api: null, wellName: "RANCHERO STATE UNIT 5H", county: "Reeves",
+    date: "2026-08-12", kind: "pad_detected", source: "Sentinel-2 change detection",
+    confidence: "unit", projected: false,
+    title: "Pad construction detected from orbit",
+    detail: "Cleared pad and new access road visible versus the Jul 28 pass. Ground work usually means a rig within weeks.",
+  },
+  {
+    id: "EV-3", api: null, wellName: "JBW HEIRS #3", county: "Atascosa",
+    date: "2026-07-19", kind: "shut_in", source: "RRC production diff",
+    confidence: "unit", projected: false,
+    title: "Well stopped reporting production",
+    detail: "Zero volumes for 4 consecutive months — roughly $610 of your revenue not flowing while it stays down.",
+  },
+  {
+    id: "EV-4", api: null, wellName: "CADDEL-SMYTH A 1H / 2H", county: "Karnes",
+    date: "2024-09-15", kind: "completed", source: "RRC W-2 completion filing",
+    confidence: "unit", projected: false,
+    title: "Refrac completed",
+    detail: "Both Caddel-Smyth A wells were refractured; production is running well above the pre-refrac trend.",
+  },
+];
+
+// ---- the upcoming well: full permit -> first-check lifecycle ---------------
+const upcoming = {
+  id: "UP-1",
+  name: "RANCHERO STATE UNIT 5H",
+  lease: "RANCHERO STATE UNIT",
+  operatorSlug: "calloway-operating",
+  county: "Reeves",
+  countySlug: "reeves",
+  formation: "Wolfcamp A",
+  permitDate: "2026-08-02",
+  plannedLateralFt: 10400,
+  expectedFirstCheckBy: "2027-06",
+  firstCheckRule:
+    "Texas Nat. Res. Code sec. 91.402: payment is due within ~120 days after " +
+    "the end of the month of first sale. First production in Feb 2027 puts " +
+    "your division order and first check no later than late June 2027.",
+  timeline: [
+    { date: "2026-08-02", kind: "permit_filed", title: "Permit filed", source: "RRC W-1", projected: false },
+    { date: "2026-08-12", kind: "pad_detected", title: "Pad spotted from orbit", source: "Sentinel-2", projected: false },
+    { date: "2026-11", kind: "frac_expected", title: "Frac job", source: "FracFocus disclosure", projected: true },
+    { date: "2027-01", kind: "completion_expected", title: "Completion filed", source: "RRC W-2", projected: true },
+    { date: "2027-02", kind: "first_production", title: "First production", source: "RRC production report", projected: true },
+    { date: "2027-06", kind: "first_check", title: "Your first check due", source: "Tex. Nat. Res. Code 91.402", projected: true },
+  ],
+};
+
 // ---- claim-search demo results ---------------------------------------------
 const claimIndex = [
   { name: "Hargrove Family Mineral Trust", county: "Reeves, Karnes, Atascosa", interests: 20, match: ["hargrove", "hargrove family", "hargrove trust"] },
@@ -271,6 +331,6 @@ const claimIndex = [
   { name: "Hargrave Minerals LP", county: "Reeves", interests: 11, match: ["hargrave", "hargrove"] },
 ];
 
-const out = { generated: "deterministic — seed 0x5eed2026", now: ym(NOW.y, NOW.m), counties, operators, wells, owner, deck, alerts, claimIndex };
+const out = { generated: "deterministic — seed 0x5eed2026", now: ym(NOW.y, NOW.m), counties, operators, wells, owner, deck, alerts, events, upcoming, claimIndex };
 writeFileSync(new URL("../data/demo.json", import.meta.url), JSON.stringify(out, null, 1));
 console.log(`wrote data/demo.json — ${wells.length} wells, ${interests.length} interests, ${deckMonths.length}-mo deck`);

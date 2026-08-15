@@ -21,36 +21,38 @@ const tiers = [
   },
   {
     name: "Owner",
-    price: "$24",
-    cadence: "/month · $199/yr",
-    blurb: "The full picture, in plain English.",
+    price: "$9",
+    cadence: "/month · $79/yr",
+    blurb: "Your cashflow, past and future.",
     features: [
       "Everything in Claimed",
       "Net cashflow history, priced to your decimal",
       "Forecasts at strip — 3, 6, 12, 36 months",
       "Well detail with decline models",
       "Check-stub upload: modeled vs. actual",
-      "Permit, status & operator alerts",
-      "PDF statements & summaries",
+      "Annual owner report (PDF)",
+      "Monthly email summary",
     ],
     cta: { label: "Start with the demo", href: "/login" },
-    featured: true,
+    featured: false,
   },
   {
-    name: "Family Office",
-    price: "$199",
-    cadence: "/month · billed annually",
-    blurb: "Multiple entities, one ledger.",
+    name: "Sentinel",
+    price: "$29",
+    cadence: "/month · $279/yr",
+    blurb: "Know before the mail does.",
     features: [
       "Everything in Owner",
-      "Unlimited owner entities under one login",
-      "Consolidated cross-entity rollups",
-      "CSV / spreadsheet export",
-      "Up to 10 seats",
-      "Priority verification & support",
+      "New permits on or near your acreage — daily",
+      "Status changes: permit → pad → frac → completion → first production",
+      "New wells added to your units",
+      "Satellite change detection over your locations (~5-day passes)",
+      "Shut-in watch with dollars-not-flowing",
+      "First-check countdown with the statutory due date",
+      "SMS alerts (arriving with public beta)",
     ],
-    cta: { label: "Talk to us", href: "/about#contact" },
-    featured: false,
+    cta: { label: "Tour the monitoring demo", href: "/login" },
+    featured: true,
   },
 ];
 
@@ -108,7 +110,32 @@ export default function Pricing() {
           ))}
         </div>
 
-        <div className="mt-12 card p-6">
+        <div className="mt-10 card flex flex-wrap items-center justify-between gap-4 p-6">
+          <div>
+            <h3 className="font-display text-xl font-semibold">Why Sentinel costs what it costs</h3>
+            <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-2">
+              Satellite monitoring isn&rsquo;t a checkbox — it&rsquo;s a pipeline we run.
+              Imagery is processed <strong className="text-ink">only for locations tied to
+              active Sentinel subscriptions</strong>, plus ten public showcase sites. Your
+              subscription funds the watching of your own acreage; nobody subsidizes
+              acreage no one is watching.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 card p-6">
+          <h3 className="font-display text-xl font-semibold">Family office?</h3>
+          <p className="mt-2 text-[14px] leading-relaxed text-ink-2">
+            Multiple entities, consolidated rollups, CSV export, and seats are
+            coming as a dedicated tier.{" "}
+            <a href="/about#contact" className="font-medium text-pine underline decoration-brass underline-offset-2">
+              Talk to us
+            </a>{" "}
+            and we&rsquo;ll set you up directly in the meantime.
+          </p>
+        </div>
+
+        <div className="mt-6 card p-6">
           <h3 className="font-display text-xl font-semibold">Fair-terms promise</h3>
           <div className="mt-3 grid gap-6 text-[14px] leading-relaxed text-ink-2 md:grid-cols-3">
             <p>

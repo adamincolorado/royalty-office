@@ -9,6 +9,7 @@
 import demoJson from "@/data/demo.json";
 import type {
   DemoData, Well, Operator, County, Interest, Owner, Deck, Alert, ClaimHit,
+  WellEvent, UpcomingWell,
 } from "./types";
 
 const db = demoJson as unknown as DemoData;
@@ -16,6 +17,8 @@ const db = demoJson as unknown as DemoData;
 export function getOwner(): Owner { return db.owner; }
 export function getDeck(): Deck { return db.deck; }
 export function getAlerts(): Alert[] { return db.alerts; }
+export function getEvents(): WellEvent[] { return db.events; }
+export function getUpcoming(): UpcomingWell { return db.upcoming; }
 export function getCounties(): County[] { return db.counties; }
 export function getOperators(): Operator[] { return db.operators; }
 export function getWells(): Well[] { return db.wells; }

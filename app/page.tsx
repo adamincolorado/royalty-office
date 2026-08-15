@@ -219,8 +219,9 @@ export default function Home() {
             One missed well pays for a decade of this
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-ink-2">
-            Free to claim your card and see your wells. Paid plans unlock
-            cashflow, forecasts, and alerts — from $24 a month.
+            Free to claim your card and see your wells. Cashflow and forecasts
+            from $9 a month; full monitoring — permits, status changes, and
+            satellite watch over your acreage — on the Sentinel plan.
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Link href="/pricing" className="btn-primary">See pricing</Link>

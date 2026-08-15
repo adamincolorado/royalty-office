@@ -1,9 +1,12 @@
 import { getOwner } from "@/lib/data";
+import { getPlan, PLAN_LABELS } from "@/lib/plan";
+import { cn } from "@/lib/format";
 
 export const metadata = { title: "Settings" };
 
 export default function Settings() {
   const owner = getOwner();
+  const plan = getPlan();
   return (
     <div className="max-w-2xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Settings</h1>
@@ -26,8 +29,27 @@ export default function Settings() {
       <div className="card mt-5 p-6">
         <h2 className="font-display text-xl font-semibold">Plan</h2>
         <p className="mt-2 text-[14px] text-ink-2">
-          Demo session — all Owner-plan features unlocked. In production this
-          panel manages billing through Stripe.
+          Current plan: <strong className="text-pine">{PLAN_LABELS[plan]}</strong>.
+          In production this panel manages billing through Stripe; in the demo
+          you can switch freely to tour both tiers.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <a
+            href="/api/demo-plan?plan=owner&to=/app/settings"
+            className={cn(plan === "owner" ? "btn-primary" : "btn-secondary")}
+          >
+            Owner — $9/mo
+          </a>
+          <a
+            href="/api/demo-plan?plan=sentinel&to=/app/settings"
+            className={cn(plan === "sentinel" ? "btn-primary" : "btn-secondary")}
+          >
+            Sentinel — $29/mo
+          </a>
+        </div>
+        <p className="mt-3 text-[12.5px] text-ink-3">
+          On the Owner plan, the Monitoring tab shows the upgrade gate —
+          switch and take a look.
         </p>
       </div>
     </div>

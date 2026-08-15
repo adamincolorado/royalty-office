@@ -157,7 +157,12 @@ export default function Dashboard() {
 
         {/* alerts */}
         <div className="card p-4 sm:p-5">
-          <h2 className="font-display text-lg font-semibold sm:text-xl">Watching for you</h2>
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg font-semibold sm:text-xl">Watching for you</h2>
+            <Link href="/app/monitoring" className="text-[13px] font-semibold text-pine hover:underline">
+              Monitoring →
+            </Link>
+          </div>
           <ul className="mt-3 space-y-4">
             {alerts.map((a) => (
               <li key={a.id} className="border-l-2 border-brass pl-3.5">

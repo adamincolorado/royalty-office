@@ -98,6 +98,52 @@ export interface Alert {
   county: string;
 }
 
+export type EventKind =
+  | "permit_filed" | "permit_amended" | "pad_detected" | "frac_expected"
+  | "frac_disclosed" | "completed" | "completion_expected"
+  | "first_production" | "first_check" | "shut_in" | "plugged";
+
+/** A detected (or projected) well-lifecycle event. `confidence` is the
+ *  owner-match tier: unit = on a unit you collect on; abstract = same survey
+ *  abstract; proximity = near your wells. */
+export interface WellEvent {
+  id: string;
+  api: string | null;
+  wellName: string;
+  county: string;
+  date: string;
+  kind: EventKind;
+  source: string;
+  confidence: "unit" | "abstract" | "proximity";
+  projected: boolean;
+  title: string;
+  detail: string;
+}
+
+export interface TimelineStep {
+  date: string;
+  kind: EventKind;
+  title: string;
+  source: string;
+  projected: boolean;
+}
+
+/** A permitted-but-not-yet-producing well being tracked to first check. */
+export interface UpcomingWell {
+  id: string;
+  name: string;
+  lease: string;
+  operatorSlug: string;
+  county: string;
+  countySlug: string;
+  formation: string;
+  permitDate: string;
+  plannedLateralFt: number;
+  expectedFirstCheckBy: string;
+  firstCheckRule: string;
+  timeline: TimelineStep[];
+}
+
 export interface ClaimHit {
   name: string;
   county: string;
@@ -114,6 +160,8 @@ export interface DemoData {
   owner: Owner;
   deck: Deck;
   alerts: Alert[];
+  events: WellEvent[];
+  upcoming: UpcomingWell;
   claimIndex: ClaimHit[];
 }
 
