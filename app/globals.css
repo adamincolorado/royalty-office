@@ -8,9 +8,25 @@
   }
   body {
     font-feature-settings: "ss01" on;
+    position: relative;
+  }
+  /* Paper grain — a whisper of print texture over everything. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   }
   ::selection {
     background: #a87b2f33;
+  }
+  :focus-visible {
+    outline: 2px solid #a87b2f;
+    outline-offset: 2px;
   }
 }
 
@@ -29,24 +45,85 @@
   }
 
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-brass-deep;
+    @apply inline-flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-brass-deep;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-6 bg-current opacity-70;
   }
 
   .card {
-    @apply rounded-sm border border-line bg-paper-card shadow-card;
+    @apply rounded-[4px] border border-line bg-paper-card shadow-card;
+  }
+  .card-float {
+    @apply rounded-md border border-line/70 bg-paper-card shadow-float;
+  }
+  .lift {
+    @apply transition-all duration-300;
+  }
+  .lift:hover {
+    @apply -translate-y-0.5 shadow-cardHover;
+  }
+
+  /* Brass hairline — the gilded edge. */
+  .hairline-brass {
+    background: linear-gradient(90deg, #a87b2f 0%, rgba(168, 123, 47, 0.35) 55%, transparent 100%);
+    height: 2.5px;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-pine px-5 py-2.5
-      text-sm font-semibold text-paper transition-colors hover:bg-pine-lift
+    @apply inline-flex items-center justify-center gap-2 rounded-[4px] px-5 py-2.5
+      text-sm font-semibold text-paper transition-all duration-200
       focus:outline-none focus-visible:ring-2 focus-visible:ring-brass;
+    background: linear-gradient(180deg, #1d4a3c 0%, #14342b 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(247, 244, 236, 0.12),
+      0 1px 2px rgba(12, 36, 29, 0.25),
+      0 8px 20px -8px rgba(12, 36, 29, 0.45);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(247, 244, 236, 0.14),
+      0 2px 4px rgba(12, 36, 29, 0.25),
+      0 14px 28px -10px rgba(12, 36, 29, 0.5);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-pine/30
-      bg-transparent px-5 py-2.5 text-sm font-semibold text-pine transition-colors
-      hover:border-pine hover:bg-pine-soft focus:outline-none focus-visible:ring-2
-      focus-visible:ring-brass;
+    @apply inline-flex items-center justify-center gap-2 rounded-[4px] border border-pine/25
+      bg-paper-card/60 px-5 py-2.5 text-sm font-semibold text-pine transition-all duration-200
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-brass;
+  }
+  .btn-secondary:hover {
+    @apply border-pine bg-pine-soft;
+    transform: translateY(-1px);
+  }
+
+  /* For dark grounds. */
+  .btn-brass {
+    @apply inline-flex items-center justify-center gap-2 rounded-[4px] px-5 py-2.5
+      text-sm font-bold text-pine-deep transition-all duration-200
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-paper;
+    background: linear-gradient(180deg, #cfa049 0%, #a87b2f 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 244, 214, 0.4),
+      0 1px 2px rgba(8, 26, 21, 0.4),
+      0 10px 24px -8px rgba(8, 26, 21, 0.55);
+  }
+  .btn-brass:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+  .btn-ghost-paper {
+    @apply inline-flex items-center justify-center gap-2 rounded-[4px] border border-paper/30
+      px-5 py-2.5 text-sm font-semibold text-paper transition-all duration-200
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-brass;
+  }
+  .btn-ghost-paper:hover {
+    @apply border-paper/70 bg-paper/10;
   }
 
   .no-scrollbar {
@@ -59,9 +136,57 @@
 
   .table-th {
     @apply border-b-2 border-ink/70 px-3 py-2 text-left text-[11px] font-semibold
-      uppercase tracking-[0.08em] text-ink-3;
+      uppercase tracking-[0.09em] text-ink-3;
   }
   .table-td {
     @apply border-b border-line-soft px-3 py-2.5 text-sm;
+  }
+}
+
+@layer utilities {
+  /* ---- entrance motion ------------------------------------------------- */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .anim {
+    animation: rise 0.85s cubic-bezier(0.16, 0.68, 0.3, 1) both;
+  }
+  .d1 { animation-delay: 0.06s; }
+  .d2 { animation-delay: 0.14s; }
+  .d3 { animation-delay: 0.22s; }
+  .d4 { animation-delay: 0.3s; }
+  .d5 { animation-delay: 0.42s; }
+
+  /* scroll reveals (driven by the Reveal client component) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.75s cubic-bezier(0.16, 0.68, 0.3, 1),
+      transform 0.75s cubic-bezier(0.16, 0.68, 0.3, 1);
+  }
+  .reveal-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anim,
+    .reveal {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    html {
+      scroll-behavior: auto;
+    }
   }
 }

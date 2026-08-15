@@ -72,42 +72,59 @@ export default function Pricing() {
           order arrives — the year has paid for itself.
         </p>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {tiers.map((t) => (
-            <div
-              key={t.name}
-              className={cn(
-                "card flex flex-col p-6",
-                t.featured && "border-brass ring-1 ring-brass",
-              )}
-            >
-              {t.featured && (
-                <p className="mb-2 w-fit rounded-full bg-brass-soft px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-brass-deep">
-                  Most owners choose this
-                </p>
-              )}
-              <h2 className="font-display text-2xl font-semibold">{t.name}</h2>
-              <p className="mt-1 text-sm text-ink-2">{t.blurb}</p>
-              <p className="mt-4">
-                <span className="figures text-3xl font-semibold text-pine">{t.price}</span>
-                <span className="ml-1 text-[13px] text-ink-3">{t.cadence}</span>
-              </p>
-              <ul className="mt-5 flex-1 space-y-2.5">
-                {t.features.map((f) => (
-                  <li key={f} className="flex gap-2.5 text-[14px] leading-snug">
-                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brass" aria-hidden="true" />
-                    <span className="text-ink-2">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={t.cta.href}
-                className={cn("mt-6", t.featured ? "btn-primary" : "btn-secondary")}
+        <div className="mt-10 grid items-start gap-5 md:grid-cols-3">
+          {tiers.map((t) =>
+            t.featured ? (
+              <div
+                key={t.name}
+                className="rounded-lg p-[1.5px] shadow-float md:-my-3"
+                style={{ background: "linear-gradient(160deg, #CFA049 0%, #A87B2F 45%, #14342B 100%)" }}
               >
-                {t.cta.label}
-              </Link>
-            </div>
-          ))}
+                <div className="flex h-full flex-col rounded-[7px] bg-paper-card p-6 md:p-7">
+                  <p className="mb-2 w-fit rounded-full bg-brass-soft px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-brass-deep">
+                    Most owners choose this
+                  </p>
+                  <h2 className="font-display text-2xl font-semibold">{t.name}</h2>
+                  <p className="mt-1 text-sm text-ink-2">{t.blurb}</p>
+                  <p className="mt-4">
+                    <span className="figures text-4xl font-semibold text-pine">{t.price}</span>
+                    <span className="ml-1 text-[13px] text-ink-3">{t.cadence}</span>
+                  </p>
+                  <ul className="mt-5 flex-1 space-y-2.5">
+                    {t.features.map((f) => (
+                      <li key={f} className="flex gap-2.5 text-[14px] leading-snug">
+                        <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brass" aria-hidden="true" />
+                        <span className="text-ink-2">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={t.cta.href} className="btn-primary mt-6">
+                    {t.cta.label}
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div key={t.name} className="card lift flex flex-col p-6">
+                <h2 className="font-display text-2xl font-semibold">{t.name}</h2>
+                <p className="mt-1 text-sm text-ink-2">{t.blurb}</p>
+                <p className="mt-4">
+                  <span className="figures text-3xl font-semibold text-pine">{t.price}</span>
+                  <span className="ml-1 text-[13px] text-ink-3">{t.cadence}</span>
+                </p>
+                <ul className="mt-5 flex-1 space-y-2.5">
+                  {t.features.map((f) => (
+                    <li key={f} className="flex gap-2.5 text-[14px] leading-snug">
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brass" aria-hidden="true" />
+                      <span className="text-ink-2">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={t.cta.href} className="btn-secondary mt-6">
+                  {t.cta.label}
+                </Link>
+              </div>
+            ),
+          )}
         </div>
 
         <div className="mt-10 card flex flex-wrap items-center justify-between gap-4 p-6">

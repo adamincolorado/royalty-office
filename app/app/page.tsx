@@ -41,7 +41,8 @@ export default function Dashboard() {
 
       {/* stat row — forward value leads, and is the hero on phones */}
       <div className="mt-5 grid grid-cols-3 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-4">
-        <div className="card col-span-3 border-brass/60 px-5 py-4 ring-1 ring-brass/30 lg:col-span-1">
+        <div className="card relative col-span-3 overflow-hidden border-brass/60 px-5 py-4 ring-1 ring-brass/30 lg:col-span-1">
+          <div className="hairline-brass absolute inset-x-0 top-0" aria-hidden="true" />
           <p className="text-[11px] font-semibold uppercase tracking-wider text-brass-deep">
             Next 12 months at strip
           </p>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "./Brand";
+import { SealWatermark } from "./Backdrops";
 
 const nav = [
   { href: "/how-it-works", label: "How it works" },
@@ -10,25 +11,25 @@ const nav = [
 
 export function MarketingNav() {
   return (
-    <header className="border-b border-line bg-paper/90 backdrop-blur-sm sticky top-0 z-40">
-      <div className="mx-auto flex max-w-wrap items-center justify-between px-5 py-3.5">
+    <header className="sticky top-0 z-40 border-b border-line/80 bg-paper/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-wrap items-center justify-between px-5">
         <Wordmark />
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-8 md:flex">
           {nav.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className="text-sm font-medium text-ink-2 transition-colors hover:text-ink"
+              className="text-[13.5px] font-medium text-ink-2 transition-colors hover:text-ink"
             >
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm font-medium text-ink-2 hover:text-ink">
+        <div className="flex items-center gap-4">
+          <Link href="/login" className="text-[13.5px] font-medium text-ink-2 hover:text-ink">
             Sign in
           </Link>
-          <Link href="/claim" className="btn-primary !py-2 !px-4">
+          <Link href="/claim" className="btn-primary !px-4 !py-2 !text-[13px]">
             Claim your card
           </Link>
         </div>
@@ -39,18 +40,22 @@ export function MarketingNav() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-pine text-paper">
-      <div className="mx-auto max-w-wrap px-5 py-12">
+    <footer className="relative overflow-hidden bg-pine-deep text-paper">
+      <div className="hairline-brass" aria-hidden="true" />
+      <div className="absolute -bottom-24 -right-16 text-paper opacity-[0.05]">
+        <SealWatermark size={420} />
+      </div>
+      <div className="relative mx-auto max-w-wrap px-5 py-14">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
             <Wordmark dark />
-            <p className="mt-3 max-w-sm font-display text-lg italic text-paper/80">
+            <p className="mt-4 max-w-sm font-display text-xl italic leading-snug text-paper/85">
               A family office for your minerals.
             </p>
-            <p className="mt-4 max-w-md text-[13px] leading-relaxed text-paper/60">
+            <p className="mt-5 max-w-md text-[13px] leading-relaxed text-paper/55">
               Royalty Office is operated by Alamo Exploration LLC. Portal
               activity is never used for acquisition outreach — read our{" "}
-              <Link href="/legal/disclosures" className="underline decoration-brass underline-offset-2">
+              <Link href="/legal/disclosures" className="underline decoration-brass underline-offset-2 hover:text-paper">
                 disclosures
               </Link>
               .
@@ -75,7 +80,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-10 border-t border-paper/15 pt-5 text-[12px] leading-relaxed text-paper/50">
+        <div className="mt-12 border-t border-paper/10 pt-6 text-[12px] leading-relaxed text-paper/45">
           <p>
             © 2026 Alamo Exploration LLC, d/b/a Royalty Office. Estimates are
             derived from public records and mathematical models; they are not

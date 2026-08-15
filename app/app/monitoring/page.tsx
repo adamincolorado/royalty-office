@@ -48,7 +48,8 @@ export default function MonitoringPage() {
       </div>
 
       {/* ---- lifecycle spotlight ---- */}
-      <div className="card mt-5 border-brass/60 p-4 ring-1 ring-brass/30 sm:mt-6 sm:p-6">
+      <div className="card relative mt-5 overflow-hidden border-brass/60 p-4 ring-1 ring-brass/30 sm:mt-6 sm:p-6">
+        <div className="hairline-brass absolute inset-x-0 top-0" aria-hidden="true" />
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
             <p className="eyebrow">New well on your unit</p>

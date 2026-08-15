@@ -31,6 +31,8 @@ const config: Config = {
         },
         pine: {
           DEFAULT: "#14342B",
+          deep: "#0C241D",
+          night: "#081A15",
           lift: "#1D4A3C",
           soft: "#E3EAE4",
         },
@@ -49,6 +51,9 @@ const config: Config = {
       },
       boxShadow: {
         card: "0 1px 2px rgba(23,37,31,.06), 0 10px 30px -18px rgba(23,37,31,.25)",
+        cardHover: "0 2px 4px rgba(23,37,31,.07), 0 18px 44px -16px rgba(23,37,31,.28)",
+        float:
+          "0 1px 2px rgba(12,36,29,.10), 0 12px 28px -10px rgba(12,36,29,.22), 0 36px 80px -24px rgba(12,36,29,.40)",
         seal: "inset 0 0 0 1px rgba(168,123,47,.45)",
       },
       maxWidth: {
