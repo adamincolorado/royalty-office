@@ -7,6 +7,10 @@ import { AppNav } from "@/components/AppNav";
 
 export const metadata = { title: "Dashboard" };
 
+/** The authed segment must never be prerendered: pages here are personalized
+ *  and cookie-gated, and a static copy would be served before the gate runs. */
+export const dynamic = "force-dynamic";
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const session = cookies().get("ro_demo_session");
   if (!session) redirect("/login");

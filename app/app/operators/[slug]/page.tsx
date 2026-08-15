@@ -2,13 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StatusPill } from "@/components/StatusPill";
 import { CashflowChart } from "@/components/charts/CashflowChart";
-import { getDeck, getOperator, getOperators, ownerPositions } from "@/lib/data";
+import { getDeck, getOperator, ownerPositions } from "@/lib/data";
 import { forecastNet, historyNet, mergeSeries, sumNet } from "@/lib/cashflow";
 import { money } from "@/lib/format";
-
-export function generateStaticParams() {
-  return getOperators().map((o) => ({ slug: o.slug }));
-}
 
 export function generateMetadata({ params }: { params: { slug: string } }) {
   const o = getOperator(params.slug);

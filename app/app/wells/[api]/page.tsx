@@ -3,14 +3,10 @@ import { notFound } from "next/navigation";
 import { StatusPill } from "@/components/StatusPill";
 import { ProductionChart } from "@/components/charts/ProductionChart";
 import { CashflowChart } from "@/components/charts/CashflowChart";
-import { getDeck, getOperator, getWell, getWells, getOwner } from "@/lib/data";
+import { getDeck, getOperator, getWell, getOwner } from "@/lib/data";
 import { forecastGross } from "@/lib/arps";
 import { forecastNet, historyNet, sumNet } from "@/lib/cashflow";
 import { money, monthLabel, num } from "@/lib/format";
-
-export function generateStaticParams() {
-  return getWells().map((w) => ({ api: w.api }));
-}
 
 export function generateMetadata({ params }: { params: { api: string } }) {
   const w = getWell(params.api);
