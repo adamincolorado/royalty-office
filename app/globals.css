@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-feature-settings: "ss01" on;
+  }
+  ::selection {
+    background: #a87b2f33;
+  }
+}
+
+@layer components {
+  /* Tabular figures wherever money or volumes appear. */
+  .figures {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* The ledger rule — a hairline with a heavier baseline, like a paper ledger. */
+  .ledger-rule {
+    border-bottom: 1px solid #dcd5c2;
+    box-shadow: 0 2px 0 -1px #efe9da;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-brass-deep;
+  }
+
+  .card {
+    @apply rounded-sm border border-line bg-paper-card shadow-card;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-pine px-5 py-2.5
+      text-sm font-semibold text-paper transition-colors hover:bg-pine-lift
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-brass;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-pine/30
+      bg-transparent px-5 py-2.5 text-sm font-semibold text-pine transition-colors
+      hover:border-pine hover:bg-pine-soft focus:outline-none focus-visible:ring-2
+      focus-visible:ring-brass;
+  }
+
+  .table-th {
+    @apply border-b-2 border-ink/70 px-3 py-2 text-left text-[11px] font-semibold
+      uppercase tracking-[0.08em] text-ink-3;
+  }
+  .table-td {
+    @apply border-b border-line-soft px-3 py-2.5 text-sm;
+  }
+}
