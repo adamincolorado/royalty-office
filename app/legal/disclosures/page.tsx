@@ -1,63 +1,86 @@
 export const metadata = { title: "Disclosures" };
 
+/** CANONICAL DISCLOSURES — launch draft for attorney review. */
 export default function Disclosures() {
   return (
     <article>
       <p className="eyebrow">Legal</p>
       <h1>Disclosures</h1>
-      <p className="text-sm text-ink-3">Last updated: August 2026</p>
+      <p className="text-sm text-ink-3">Version 2026-08-15 (launch draft — under attorney review).</p>
 
       <h2>Who operates Royalty Office</h2>
       <p>
         Royalty Office is a trade name of Alamo Exploration LLC, a Texas
         limited liability company. Affiliates of Alamo Exploration LLC engage
-        in the acquisition of mineral and royalty interests.
+        in the acquisition and leasing of mineral and royalty interests. We
+        disclose this prominently because you should read everything in the
+        Service knowing who built it.
       </p>
 
-      <h2>The information wall</h2>
+      <h2>Informational purposes only — no advice, no reliance</h2>
       <p>
-        Your activity inside Royalty Office — searches, claims, pages viewed,
-        forecasts run, documents uploaded — is used to provide the service to
-        you and for nothing else. Specifically:
-      </p>
-      <ul>
-        <li>Portal activity is never provided to any acquisition team or affiliate for the purpose of identifying, valuing, or soliciting interests to purchase.</li>
-        <li>Documents you upload (check stubs, division orders) are visible to you and to support staff assisting you, and are never used in acquisition underwriting.</li>
-        <li>We do not sell, rent, or share subscriber data with third parties for marketing.</li>
-      </ul>
-      <p>
-        If you ever receive an unsolicited purchase offer from an affiliate,
-        it was generated from public records available to any buyer — not from
-        your use of this product.
+        Everything in the Service is general information assembled from
+        public records and models. It is inherently speculative, is not
+        investment, legal, tax, engineering, or other professional advice,
+        is not a statement of account or a valuation, and must not be used
+        as the basis for any decision of financial, legal, or personal
+        consequence. Your operator&rsquo;s division orders, your lease, and
+        your operator&rsquo;s statements exclusively govern what you are
+        owed. Independently verify anything that matters and engage your own
+        professionals. Our Terms of Service contain a no-reliance agreement,
+        a release of claims, and a limitation of liability; by using the
+        Service you accept them.
       </p>
 
-      <h2>Estimates, not statements</h2>
+      <h2>Estimates and projections</h2>
       <p>
-        Figures shown in Royalty Office are estimates computed from public
-        records — Railroad Commission of Texas production filings, county
-        appraisal district mineral rolls, and similar sources — combined with
-        mathematical models. They are not statements of account. Your
-        operator's division orders, lease terms, and revenue statements govern
-        what you are actually paid.
-      </p>
-
-      <h2>Forecasts and prices</h2>
-      <p>
-        Forward projections use published futures ("strip") prices as of a
-        stated date, held flat beyond quoted tenors, with modeled taxes and
-        deductions. They are volume forecasts priced at market quotes — not
-        price predictions, not valuations of your property, and not an offer
-        or solicitation of any kind. Royalty Office is not an investment
-        adviser, broker, landman service, or law firm, and nothing in the
-        product is investment, legal, tax, or engineering advice.
+        Projections apply published futures prices (held flat beyond quoted
+        tenors) to modeled volumes, less modeled taxes and deductions. They
+        are arithmetic on stated assumptions — not predictions and not
+        promises. Actual production, prices, deductions, and payments will
+        differ, possibly materially. Statements about expected
+        division-order or payment timing describe general statutory
+        timelines only.
       </p>
 
       <h2>Data limitations</h2>
       <ul>
-        <li>Texas oil production is reported at the lease level; per-well figures are allocations and are labeled as such.</li>
-        <li>RRC production data arrives on an approximately 2–4 month reporting lag.</li>
-        <li>County mineral rolls are updated annually and may lag ownership changes, probates, and transfers.</li>
+        <li>Texas reports oil production at the lease level; per-well figures are allocations.</li>
+        <li>Railroad Commission production data lags roughly 2–4 months and may be restated.</li>
+        <li>County mineral rolls update periodically and can lag transfers, probates, and corrections; name matches can be wrong in either direction.</li>
+        <li>Satellite change detection is probabilistic and can miss activity or flag non-well activity.</li>
       </ul>
+
+      <h2>Marketing and data practices</h2>
+      <p>
+        We do <strong>not sell your personal information to unaffiliated
+        third parties</strong>. We may use your contact and account
+        information <strong>within the Alamo Exploration corporate
+        family</strong> for internal purposes, <strong>including
+        marketing</strong> — which may include offers to purchase or lease
+        mineral or royalty interests. Every marketing message carries an
+        opt-out, and opting out never affects your subscription. Documents
+        you upload are never used to price or underwrite an offer to you.
+        If you transact with any member of the corporate family, that is a
+        separate, arms-length transaction in which we do not represent you;
+        get independent advice and competing offers.
+      </p>
+
+      <h2>Verification is not title work</h2>
+      <p>
+        Claiming and verifying an owner card is a fraud-deterrence process,
+        not a title examination. It does not establish, confirm, or
+        adjudicate ownership, and overlapping claims by multiple family
+        members or parties may coexist.
+      </p>
+
+      <h2>Not a brokerage or advisory service</h2>
+      <p>
+        Royalty Office is not a broker, dealer, investment adviser, landman
+        service, law firm, or engineering firm, and no communication from
+        the Service or our team constitutes professional services or creates
+        a professional-client relationship.
+      </p>
     </article>
   );
 }

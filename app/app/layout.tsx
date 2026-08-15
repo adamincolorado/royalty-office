@@ -53,9 +53,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-line bg-paper-deep px-5 py-4">
         <p className="mx-auto max-w-wrap text-[11.5px] leading-relaxed text-ink-3">
           Estimates from public records and models — not statements of account,
-          not investment advice. Operator statements govern actual payment.
-          Royalty Office is operated by Alamo Exploration LLC · portal activity
-          is never used for acquisition outreach.
+          not investment advice, not a basis for any decision. Operator
+          statements govern actual payment. Royalty Office is operated by
+          Alamo Exploration LLC · we never sell your data to third parties ·
+          see Disclosures and Terms.
         </p>
       </footer>
     </div>

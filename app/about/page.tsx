@@ -47,10 +47,13 @@ export default function About() {
           </p>
           <p>So the rules are written down, in our{" "}
             <a href="/legal/disclosures" className="font-medium text-pine underline decoration-brass underline-offset-2">disclosures</a>:
-            your activity in this product — what you look at, what you claim,
-            what you forecast — is never used to target acquisition offers.
-            The subscription is the business, not a lead list. If an affiliate
-            ever makes you an unsolicited offer, it didn't come from here.
+            we never sell your information to third parties. We may tell you
+            about products and services from our own corporate family —
+            including offers on minerals — and every such message carries an
+            opt-out that never affects your subscription. Documents you upload
+            are never used to price an offer to you, and any transaction with
+            an affiliate is arms-length: get independent advice and competing
+            offers, always.
           </p>
         </div>
 

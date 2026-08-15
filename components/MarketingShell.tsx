@@ -53,12 +53,12 @@ export function Footer() {
               A family office for your minerals.
             </p>
             <p className="mt-5 max-w-md text-[13px] leading-relaxed text-paper/55">
-              Royalty Office is operated by Alamo Exploration LLC. Portal
-              activity is never used for acquisition outreach — read our{" "}
+              Royalty Office is operated by Alamo Exploration LLC. We never
+              sell your data to third parties — see our{" "}
               <Link href="/legal/disclosures" className="underline decoration-brass underline-offset-2 hover:text-paper">
                 disclosures
-              </Link>
-              .
+              </Link>{" "}
+              for exactly how we use it.
             </p>
           </div>
           <div>

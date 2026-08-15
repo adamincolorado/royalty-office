@@ -161,9 +161,10 @@ export default function Pricing() {
               first 60 days. Your claimed card stays yours on the free tier.
             </p>
             <p>
-              <strong className="text-ink">No selling, ever.</strong> Consent
-              to a subscription is not consent to be solicited. Portal
-              activity is never used for acquisition outreach.
+              <strong className="text-ink">Your data is not for sale.</strong>{" "}
+              We never sell your information to third parties. Marketing from
+              our own corporate family always carries an opt-out that never
+              affects your subscription.
             </p>
             <p>
               <strong className="text-ink">Heirs welcome.</strong> Multiple

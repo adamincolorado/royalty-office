@@ -243,7 +243,7 @@ export default function Home() {
                 {[
                   ["Public sources only", "RRC, county rolls, GLO, FracFocus — never private data about you."],
                   ["Strip prices, not speculation", "Forecasts are priced at the published futures curve, clearly dated. We never predict prices."],
-                  ["Your activity stays yours", "Royalty Office is operated by Alamo Exploration LLC. What you view here is never used for acquisition outreach — in writing, in our disclosures."],
+                  ["Straight about who we are", "Royalty Office is operated by Alamo Exploration LLC, whose affiliates buy and lease minerals. We never sell your data to third parties, and our disclosures say exactly how we use it."],
                   ["Not investment advice", "We show you the math. Decisions — and the professionals you hire for them — are yours."],
                 ].map(([t, d]) => (
                   <li key={t} className="flex gap-3.5">
