@@ -16,7 +16,7 @@ export default function HowItWorks() {
           {[
             {
               t: "1. Search the name on your checks",
-              d: "Texas county appraisal districts publish mineral ownership rolls — who owns a royalty interest in which lease, and what decimal share. We've indexed those rolls statewide: 7.9 million interests across 965,000 owners, matched to 548,000 wells in Railroad Commission records. Search your name, a family trust, or an LLC, and see the interests the counties have on file.",
+              d: "Texas county appraisal districts publish mineral ownership rolls — who owns a royalty interest in which lease, and what decimal share. We've loaded those rolls for Martin and Karnes counties: 369,223 interests across 31,331 owners, with 93% matched to a producing lease in Railroad Commission records. Search your name, a family trust, or an LLC, and see the interests the counties have on file. More counties are added through the beta.",
             },
             {
               t: "2. Verify with a mailed code",

@@ -38,8 +38,9 @@ export default function Home() {
               </Link>
             </div>
             <p className="anim d4 mt-6 text-[13px] text-paper/50">
-              We&rsquo;ve already indexed 7.9 million Texas mineral interests.
-              Your file probably exists — come claim it.
+              Live now for Martin and Karnes counties — 369,000 mineral
+              interests, straight from the county rolls. More counties
+              landing through the beta.
             </p>
           </div>
 
@@ -100,10 +101,10 @@ export default function Home() {
         <div className="relative border-t border-paper/10">
           <div className="mx-auto grid max-w-wrap grid-cols-2 gap-x-6 gap-y-8 px-5 py-9 md:grid-cols-4">
             {[
-              { n: 7.9, d: 1, suffix: " million", k: "Texas mineral interests indexed" },
-              { n: 965, d: 0, suffix: ",000", k: "distinct owners on file" },
-              { n: 548, d: 0, suffix: ",000", k: "interest-to-well links resolved" },
-              { n: 254, d: 0, suffix: "", k: "Texas counties covered" },
+              { n: 369, d: 0, suffix: ",223", k: "mineral interests on file" },
+              { n: 31, d: 0, suffix: ",331", k: "owners you can search by name" },
+              { n: 93, d: 0, suffix: "%", k: "interests matched to a producing lease" },
+              { n: 2, d: 0, suffix: "", k: "counties live in beta" },
             ].map((s) => (
               <div key={s.k}>
                 <p className="figures text-[28px] font-semibold leading-none text-brass">
@@ -182,7 +183,7 @@ export default function Home() {
               {
                 n: "1",
                 t: "Search your name",
-                d: "We've indexed the mineral ownership rolls of all 254 Texas counties. Search the name your checks come in — yours, a family trust, an LLC.",
+                d: "We've indexed the mineral ownership rolls of Martin and Karnes counties, with more added through the beta. Search the name your checks come in — yours, a family trust, an LLC.",
               },
               {
                 n: "2",

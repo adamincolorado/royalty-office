@@ -27,7 +27,7 @@ export default function About() {
           </p>
           <p>
             Royalty Office reads it for you. We index the public record for
-            all 254 Texas counties, tie every interest to its wells, model
+            Texas county by county, tie every interest to its leases, model
             what each well should be paying, and put it on one page you can
             actually read — whether it's your first royalty check or your
             family's hundredth year of them.

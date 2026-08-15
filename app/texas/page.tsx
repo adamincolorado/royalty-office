@@ -16,8 +16,9 @@ export default function TexasIndex() {
         </h1>
         <p className="mt-3 max-w-xl text-ink-2">
           Production, operators, and permitting activity for the counties in
-          our beta. Statewide coverage — all 254 counties — ships with public
-          launch.
+          our beta. Ownership rolls are loaded for Martin and Karnes; the
+          others show production and permits only. More counties land through
+          the beta.
         </p>
         <div className="mt-8 grid gap-5 md:grid-cols-3">
           {counties.map((c) => (

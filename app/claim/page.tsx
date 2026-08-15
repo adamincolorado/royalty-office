@@ -20,10 +20,11 @@ export default function ClaimPage() {
           <ClaimFlow />
         </div>
         <p className="mt-10 text-[12.5px] leading-relaxed text-ink-3">
-          This demo searches a small fictional index. In production, search
-          runs against 965,000 owner names from the mineral appraisal rolls of
-          all 254 Texas counties. Ownership rolls are public records;
-          cashflow detail unlocks only after verification.
+          This demo searches a small fictional index. The live beta searches
+          31,331 owner names from the mineral appraisal rolls of Martin and
+          Karnes counties — if your minerals are elsewhere in Texas, we do not
+          have you on file yet. Ownership rolls are public records; cashflow
+          detail unlocks only after verification.
         </p>
       </section>
     </MarketingShell>
