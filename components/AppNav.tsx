@@ -10,6 +10,7 @@ const tabs = [
   { href: "/app/operators", label: "Operators" },
   { href: "/app/cashflow", label: "Cashflow & forecast" },
   { href: "/app/monitoring", label: "Monitoring" },
+  { href: "/app/offers", label: "Offers" },
 ];
 
 export function AppNav() {
