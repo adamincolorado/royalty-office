@@ -226,6 +226,131 @@ export async function getOwnerSummary(ownerId: number): Promise<OwnerSummary | n
   };
 }
 
+// ---------------------------------------------------------------- history
+
+export interface OwnerMonth {
+  month: string;               // "YYYY-MM"
+  oilBbl: number;              // owner's share (gross volume x decimal)
+  gasMcf: number;
+  grossRevenue: number;        // at REFERENCE_PRICE, before severance/deducts
+}
+
+/**
+ * The owner's monthly production history, net to their decimals, summed
+ * across every priced interest. TRUE months only (period_months = 1) — the
+ * 12-month window rows exist for the revenue basis and would double-count
+ * here. Gross revenue at the reference price: it runs HIGH against a real
+ * check (severance and post-production deducts are not netted), and every
+ * surface that shows it says so.
+ */
+export async function getOwnerHistory(ownerId: number, months = 24): Promise<OwnerMonth[]> {
+  const rows = await q(
+    `SELECT to_char(pm.month, 'YYYY-MM') AS ym,
+            sum(pm.oil_bbl * b.revenue_decimal)  AS oil,
+            sum(pm.gas_mcf * b.revenue_decimal)  AS gas
+       FROM core.mineral_interests mi
+       JOIN core.interest_revenue_basis b ON b.interest_id = mi.interest_id
+       JOIN core.production_monthly pm ON pm.lease_id = mi.lease_id
+      WHERE mi.owner_id = $1
+        AND mi.interest_type IN ('RI','ORRI')
+        AND pm.level = 'lease' AND pm.period_months = 1
+        AND pm.month >= (date_trunc('month', now()) - ($2 || ' months')::interval)
+      GROUP BY 1 ORDER BY 1`,
+    [ownerId, months],
+  );
+  return rows.map((r) => {
+    const oil = num(r.oil);
+    const gas = num(r.gas);
+    return {
+      month: String(r.ym),
+      oilBbl: oil,
+      gasMcf: gas,
+      grossRevenue: oil * REFERENCE_PRICE.oil + gas * REFERENCE_PRICE.gas,
+    };
+  });
+}
+
+// ---------------------------------------------------------------- forecast
+
+export interface OwnerForecastMonth {
+  month: string;
+  oilBbl: number;              // owner's share
+  grossRevenue: number;
+}
+
+export interface OwnerForecast {
+  months: OwnerForecastMonth[];
+  leasesForecast: number;      // leases with a publishable curve
+  leasesHeldOut: number;       // owner's priced leases with NO publishable curve
+  priceDeck: string;           // disclosure label, e.g. 'placeholder_flat'
+  oilPrice: number;
+}
+
+/**
+ * Forward cashflow, owner's share, built ONLY from core.publishable_forecasts
+ * — the view that enforces the engineering standard (mig 015). A lease with
+ * no publishable curve contributes NOTHING here and is counted in
+ * leasesHeldOut so the page can say "N of your leases have no defensible
+ * forecast" instead of quietly showing a smaller number. Oil stream only,
+ * matching fit_declines_v2. Zero-decimal or unpriced interests contribute
+ * nothing by construction.
+ */
+export async function getOwnerForecast(ownerId: number, months = 36): Promise<OwnerForecast> {
+  const rows = await q(
+    `SELECT f.lease_id, f.qi, f.di_nominal, f.b_factor, f.terminal_decline,
+            to_char(f.t0, 'YYYY-MM')               AS t0,
+            to_char(f.econ_limit_month, 'YYYY-MM') AS econ_limit,
+            f.price_deck,
+            sum(b.revenue_decimal)                 AS decimal
+       FROM core.mineral_interests mi
+       JOIN core.interest_revenue_basis b ON b.interest_id = mi.interest_id
+       JOIN core.publishable_forecasts f ON f.lease_id = mi.lease_id
+      WHERE mi.owner_id = $1 AND mi.interest_type IN ('RI','ORRI')
+        AND f.stream = 'oil'
+      GROUP BY f.lease_id, f.qi, f.di_nominal, f.b_factor, f.terminal_decline,
+               f.t0, f.econ_limit_month, f.price_deck`,
+    [ownerId],
+  );
+  const heldOut = await q1(
+    `SELECT count(DISTINCT mi.lease_id)::int AS n
+       FROM core.mineral_interests mi
+       JOIN core.interest_revenue_basis b ON b.interest_id = mi.interest_id
+      WHERE mi.owner_id = $1 AND mi.interest_type IN ('RI','ORRI')
+        AND mi.lease_id IS NOT NULL
+        AND NOT EXISTS (SELECT 1 FROM core.publishable_forecasts pf
+                        WHERE pf.lease_id = mi.lease_id AND pf.stream = 'oil')`,
+    [ownerId],
+  );
+
+  const now = new Date();
+  const start = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  const { monthlyRate, addMonths, monthsBetween } = await import("./arps");
+
+  const out: OwnerForecastMonth[] = [];
+  for (let k = 1; k <= months; k++) {
+    const ym = addMonths(start, k);
+    let oil = 0;
+    for (const r of rows) {
+      // The forecast stops at the ECONOMIC LIMIT, never runs to zero rate —
+      // a curve past the limit overstates reserves, always (standard sec 2.5).
+      if (String(r.econ_limit) && ym > String(r.econ_limit)) continue;
+      const t = monthsBetween(String(r.t0), ym);
+      if (t < 0) continue;
+      oil +=
+        monthlyRate(num(r.qi), num(r.di_nominal), num(r.b_factor),
+                    num(r.terminal_decline), t) * num(r.decimal);
+    }
+    out.push({ month: ym, oilBbl: oil, grossRevenue: oil * REFERENCE_PRICE.oil });
+  }
+  return {
+    months: out,
+    leasesForecast: rows.length,
+    leasesHeldOut: num((heldOut as Record<string, unknown>)?.n),
+    priceDeck: rows.length ? String(rows[0].price_deck) : "none",
+    oilPrice: REFERENCE_PRICE.oil,
+  };
+}
+
 /** Coverage figures for the marketing surface — real, not asserted. */
 export interface IndexHit {
   name: string;

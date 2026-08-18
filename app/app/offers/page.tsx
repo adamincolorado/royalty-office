@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import Link from "next/link";
 import { OfferRequestFlow } from "@/components/OfferRequestFlow";
 import { getDeck, ownerPositions } from "@/lib/data";
@@ -6,7 +8,13 @@ import { money } from "@/lib/format";
 
 export const metadata = { title: "Offers" };
 
-export default function OffersPage() {
+export default async function OffersPage() {
+  // Demo-only surface: nothing real behind it yet. A signed-in owner is
+  // routed home rather than shown fiction.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind !== "demo") redirect("/app");
+
   const deck = getDeck();
   const ranchero = ownerPositions().filter((p) => p.well.lease === "RANCHERO STATE UNIT");
   const next12 = ranchero.reduce((s, p) => s + sumNet(forecastNet(p.well, p.interest, deck, 12)), 0);

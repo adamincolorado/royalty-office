@@ -1,37 +1,136 @@
-import { ForecastCenter } from "@/components/ForecastCenter";
-import { getDeck, ownerPositions } from "@/lib/data";
-import { forecastNet } from "@/lib/cashflow";
+import { redirect } from "next/navigation";
+import { getViewer, activeClaims, verifiedClaims } from "@/lib/viewer";
+import { getOwnerHistory, getOwnerForecast } from "@/lib/queries";
+import { money } from "@/lib/format";
+import { DemoCashflow } from "./_demo";
 
 export const metadata = { title: "Cashflow & forecast" };
+export const dynamic = "force-dynamic";
 
-/** Server component precomputes 36 months of per-position forecast once;
- *  the client picks horizons out of it — no refits, no recalcs. */
-export default function CashflowPage() {
-  const deck = getDeck();
-  const positions = ownerPositions();
-  const perPosition = positions.map((p) => ({
-    id: p.interest.id,
-    well: p.well.name,
-    api: p.well.api,
-    county: p.well.county,
-    operatorSlug: p.well.operatorSlug,
-    status: p.well.status,
-    decimal: p.interest.decimal,
-    months: forecastNet(p.well, p.interest, deck, 36).map((m) => ({
-      month: m.month,
-      net: +m.netRevenue.toFixed(2),
-    })),
-  }));
+/**
+ * History is reported volumes × the owner's decimals. The forward table is
+ * built ONLY from curves that clear the publication standard (mig 015) and
+ * stops at each lease's economic limit. Verified claims only — this page is
+ * the paywall's reason to exist and the ladder's top rung.
+ */
+export default async function CashflowPage() {
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind === "demo") return <DemoCashflow />;
+
+  const claims = activeClaims(viewer);
+  if (claims.length === 0) redirect("/onboarding");
+  const claim = claims[0];
+
+  if (verifiedClaims(viewer).length === 0) {
+    return (
+      <div className="mx-auto max-w-xl">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Cashflow &amp; forecast</h1>
+        <div className="card mt-5 border-brass p-6">
+          <h2 className="font-display text-lg font-semibold">Unlocks at verification</h2>
+          <p className="mt-2 text-[14px] leading-relaxed text-ink-2">
+            Cashflow-to-you is effectively a financial statement, so we show it only to a
+            verified claimant of <strong>{claim.ownerName}</strong>. Verification is a one-time
+            code mailed to the address on the county roll (3–5 business days), or a recent check
+            stub for instant verification. Your recorded interests and their public-record
+            details are already open under Holdings.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const history = await getOwnerHistory(claim.ownerId, 24);
+  const forecast = await getOwnerForecast(claim.ownerId, 36);
+  const h12 = history.slice(-12).reduce((s, m) => s + m.grossRevenue, 0);
+  const f12 = forecast.months.slice(0, 12).reduce((s, m) => s + m.grossRevenue, 0);
+  const f36 = forecast.months.reduce((s, m) => s + m.grossRevenue, 0);
 
   return (
-    <ForecastCenter
-      positions={perPosition}
-      deck={{
-        label: deck.label,
-        asOf: deck.asOf,
-        note: deck.note,
-        months: deck.months.slice(0, 12),
-      }}
-    />
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Cashflow &amp; forecast</h1>
+        <p className="text-[13px] text-ink-3">
+          gross to your decimals · ${forecast.oilPrice}/bbl held flat ({forecast.priceDeck})
+        </p>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="card p-4">
+          <p className="text-[12px] font-semibold text-ink-3">Trailing 12 months, gross</p>
+          <p className="figures mt-1 text-2xl font-semibold">{money(h12)}</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-[12px] font-semibold text-ink-3">Projected next 12, gross</p>
+          <p className="figures mt-1 text-2xl font-semibold">{money(f12)}</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-[12px] font-semibold text-ink-3">Projected next 36, gross</p>
+          <p className="figures mt-1 text-2xl font-semibold">{money(f36)}</p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div className="card p-5">
+          <h2 className="font-display text-lg font-semibold">History — reported</h2>
+          <table className="mt-3 w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-line text-left text-[11.5px] text-ink-3">
+                <th className="py-1.5 font-semibold">Month</th>
+                <th className="py-1.5 text-right font-semibold">Oil bbl (yours)</th>
+                <th className="py-1.5 text-right font-semibold">Gas mcf (yours)</th>
+                <th className="py-1.5 text-right font-semibold">Gross $</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.slice().reverse().map((m) => (
+                <tr key={m.month} className="border-b border-line/50 last:border-0">
+                  <td className="figures py-1.5">{m.month}</td>
+                  <td className="figures py-1.5 text-right">{m.oilBbl.toFixed(1)}</td>
+                  <td className="figures py-1.5 text-right">{m.gasMcf.toFixed(0)}</td>
+                  <td className="figures py-1.5 text-right">{money(m.grossRevenue)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="card p-5">
+          <h2 className="font-display text-lg font-semibold">Forecast — modeled</h2>
+          <p className="mt-1 text-[12px] text-ink-3">
+            {forecast.leasesForecast} lease curve{forecast.leasesForecast === 1 ? "" : "s"} past
+            the publication gate{forecast.leasesHeldOut > 0 &&
+              `; ${forecast.leasesHeldOut} lease${forecast.leasesHeldOut === 1 ? "" : "s"} held out — insufficient history to defend a curve`}.
+          </p>
+          <table className="mt-3 w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-line text-left text-[11.5px] text-ink-3">
+                <th className="py-1.5 font-semibold">Month</th>
+                <th className="py-1.5 text-right font-semibold">Oil bbl (yours)</th>
+                <th className="py-1.5 text-right font-semibold">Gross $</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forecast.months.slice(0, 12).map((m) => (
+                <tr key={m.month} className="border-b border-line/50 last:border-0">
+                  <td className="figures py-1.5">{m.month}</td>
+                  <td className="figures py-1.5 text-right">{m.oilBbl.toFixed(1)}</td>
+                  <td className="figures py-1.5 text-right">{money(m.grossRevenue)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p className="mt-5 max-w-3xl text-[12px] leading-relaxed text-ink-3">
+        All figures are GROSS to your recorded decimals — before severance tax, post-production
+        deductions, and property tax — so they run high against a real check. Forecasts are
+        modified-Arps declines fit from each lease&rsquo;s own reported history, published only where
+        that history supports a defensible curve, stopped at the economic limit, at a flat
+        reference price. Estimates, not statements of account; operator statements govern actual
+        payment.
+      </p>
+    </div>
   );
 }

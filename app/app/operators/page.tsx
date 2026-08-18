@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import Link from "next/link";
 import { getDeck, getOperators, ownerPositions } from "@/lib/data";
 import { forecastNet, historyNet, sumNet } from "@/lib/cashflow";
@@ -5,7 +7,13 @@ import { money, num } from "@/lib/format";
 
 export const metadata = { title: "Your operators" };
 
-export default function OperatorsPage() {
+export default async function OperatorsPage() {
+  // Demo-only surface: nothing real behind it yet. A signed-in owner is
+  // routed home rather than shown fiction.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind !== "demo") redirect("/app");
+
   const deck = getDeck();
   const positions = ownerPositions();
   const rows = getOperators().map((op) => {

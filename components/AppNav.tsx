@@ -4,7 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/format";
 
-const tabs = [
+// Two tab sets. The demo tour shows the full aspiration; a real owner sees
+// only surfaces backed by real data today. Operators/Monitoring/Offers stay
+// demo-only until they read core.* — the Offers surface in particular is
+// held back deliberately pending counsel (affiliate purchase offers inside
+// the product carry disclosure requirements that are not written yet).
+const DEMO_TABS = [
   { href: "/app", label: "Overview", exact: true },
   { href: "/app/wells", label: "Wells" },
   { href: "/app/operators", label: "Operators" },
@@ -12,8 +17,15 @@ const tabs = [
   { href: "/app/monitoring", label: "Monitoring" },
   { href: "/app/offers", label: "Offers" },
 ];
+const OWNER_TABS = [
+  { href: "/app", label: "Overview", exact: true },
+  { href: "/app/wells", label: "Holdings" },
+  { href: "/app/cashflow", label: "Cashflow & forecast" },
+  { href: "/app/settings", label: "Settings" },
+];
 
-export function AppNav() {
+export function AppNav({ variant = "demo" }: { variant?: "demo" | "owner" }) {
+  const tabs = variant === "owner" ? OWNER_TABS : DEMO_TABS;
   const path = usePathname();
   return (
     <div className="relative">

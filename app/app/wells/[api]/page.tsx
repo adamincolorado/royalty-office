@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StatusPill } from "@/components/StatusPill";
@@ -13,7 +15,13 @@ export function generateMetadata({ params }: { params: { api: string } }) {
   return { title: w ? w.name : "Well" };
 }
 
-export default function AppWellPage({ params }: { params: { api: string } }) {
+export default async function AppWellPage({ params }: { params: { api: string } }) {
+  // Demo-only surface: nothing real behind it yet. A signed-in owner is
+  // routed home rather than shown fiction.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind !== "demo") redirect("/app");
+
   const well = getWell(params.api);
   if (!well) notFound();
   const owner = getOwner();

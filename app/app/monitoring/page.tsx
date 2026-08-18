@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import Link from "next/link";
 import { SatelliteTiles } from "@/components/SatelliteTiles";
 import { getEvents, getUpcoming, getOperator, ownerPositions } from "@/lib/data";
@@ -26,7 +28,13 @@ const CONFIDENCE_LABEL: Record<string, string> = {
   proximity: "near your wells",
 };
 
-export default function MonitoringPage() {
+export default async function MonitoringPage() {
+  // Demo-only surface: nothing real behind it yet. A signed-in owner is
+  // routed home rather than shown fiction.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind !== "demo") redirect("/app");
+
   const plan = getPlan();
   if (plan !== "sentinel") return <UpgradeGate />;
 

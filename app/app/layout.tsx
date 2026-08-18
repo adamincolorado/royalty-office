@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
-import { getOrCreateUser } from "@/lib/user";
 import { Seal, Wordmark } from "@/components/Brand";
 import { getOwner, latestMonth } from "@/lib/data";
+import { getViewer, activeClaims } from "@/lib/viewer";
 import { AppNav } from "@/components/AppNav";
 
 export const metadata = { title: "Dashboard" };
@@ -15,34 +13,38 @@ export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  // Two ways in. Clerk is the real one. The demo cookie survives only where
-  // the demo routes themselves survive — development — so production has a
-  // single door.
-  const { userId } = await auth();
-  const demo =
-    process.env.NODE_ENV !== "production" && cookies().get("ro_demo_session");
-  if (!userId && !demo) redirect("/login");
+  // Clerk is the real door; the demo cookie exists only where the demo
+  // routes exist — development. getViewer() resolves both and materializes
+  // the app.users row on first authenticated request. Entitlement still
+  // comes from claims, never from the session.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
 
-  // Materialise the app.users row on first authenticated request. Entitlement
-  // still comes from that row, never from the Clerk session.
-  if (userId) await getOrCreateUser();
+  const isDemo = viewer.kind === "demo";
+  const claims = isDemo ? [] : activeClaims(viewer);
+  // A real account with nothing claimed has nothing to show — send it to
+  // claim attach rather than render an empty shell.
+  if (!isDemo && claims.length === 0) redirect("/onboarding");
 
-  const owner = getOwner();
+  const chip = isDemo
+    ? { short: getOwner().shortName, full: getOwner().name }
+    : { short: claims[0].ownerName, full: claims[0].ownerName };
+  const pendingOnly = !isDemo && claims.every((c) => c.status === "pending");
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* demo ribbon */}
-      {/* The label belongs to the DATA, not to the visitor. An earlier version
-          hid this whenever someone was signed in, which meant the one class of
-          user who most needs to know they are looking at a fictional portfolio
-          — a real, authenticated owner — was the only one who never saw it. */}
-      <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
-        {userId ? (
-          <>PREVIEW — sample portfolio, not your interests. Your own data appears once you claim it.</>
-        ) : (
-          <>DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.</>
-        )}
-      </div>
+      {/* The label belongs to the DATA. Demo data says so loudly; a real
+          pending claim says what is locked and why. Verified says nothing. */}
+      {isDemo && (
+        <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
+          DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.
+        </div>
+      )}
+      {pendingOnly && (
+        <div className="bg-paper-deep px-4 py-1.5 text-center text-[12px] font-semibold text-ink-2">
+          Claim pending verification — public-record details are open; cashflow unlocks at verified.
+        </div>
+      )}
 
       <header className="border-b border-line bg-paper-card">
         <div className="mx-auto flex max-w-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
@@ -52,32 +54,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Seal size={30} />
             </Link>
             <Wordmark className="hidden sm:flex" />
-            {/* Never present the sample owner as if it were this account. */}
             <span className="min-w-0 truncate rounded-full bg-pine-soft px-3 py-1 text-[12px] font-semibold text-pine">
-              {userId ? (
-                <>Sample portfolio</>
-              ) : (
-                <>
-                  <span className="md:hidden">{owner.shortName}</span>
-                  <span className="hidden md:inline">{owner.name}</span>
-                </>
-              )}
+              <span className="md:hidden">{chip.short}</span>
+              <span className="hidden md:inline">{chip.full}</span>
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-3.5 sm:gap-4">
             <Link href="/app/settings" className="text-sm font-medium text-ink-2 hover:text-ink">
               Settings
             </Link>
-            {userId ? (
-              <UserButton afterSignOutUrl="/" />
-            ) : (
+            {isDemo ? (
               <a href="/api/demo-logout" className="text-sm font-medium text-ink-2 hover:text-ink">
                 Exit demo
               </a>
+            ) : (
+              <UserButton afterSignOutUrl="/" />
             )}
           </div>
         </div>
-        <AppNav />
+        <AppNav variant={isDemo ? "demo" : "owner"} />
       </header>
 
       <main className="mx-auto w-full max-w-wrap flex-1 px-5 py-8">{children}</main>

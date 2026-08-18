@@ -15,7 +15,7 @@
  */
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPrivate = createRouteMatcher(["/app(.*)"]);
+const isPrivate = createRouteMatcher(["/app(.*)", "/onboarding(.*)", "/api/app(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Deliberately NOT calling auth.protect() here.
@@ -41,6 +41,9 @@ export const config = {
   matcher: [
     // the authed application
     "/app/:path*",
+    // claim attach (post-signup) and the authed claim APIs
+    "/onboarding/:path*",
+    "/api/app/:path*",
     // sign-in / sign-up need Clerk context to render and to complete a flow
     "/login/:path*",
     "/signup/:path*",

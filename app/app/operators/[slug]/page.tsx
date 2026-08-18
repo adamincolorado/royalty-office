@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StatusPill } from "@/components/StatusPill";
@@ -11,7 +13,13 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   return { title: o ? `${o.name} — your position` : "Operator" };
 }
 
-export default function AppOperatorPage({ params }: { params: { slug: string } }) {
+export default async function AppOperatorPage({ params }: { params: { slug: string } }) {
+  // Demo-only surface: nothing real behind it yet. A signed-in owner is
+  // routed home rather than shown fiction.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind !== "demo") redirect("/app");
+
   const op = getOperator(params.slug);
   if (!op) notFound();
   const deck = getDeck();

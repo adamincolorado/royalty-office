@@ -1,76 +1,92 @@
-import Link from "next/link";
-import { StatusPill } from "@/components/StatusPill";
-import { Sparkline } from "@/components/charts/Sparkline";
-import { getDeck, ownerPositions } from "@/lib/data";
-import { forecastNet, historyNet, sumNet } from "@/lib/cashflow";
+import { redirect } from "next/navigation";
+import { getViewer, activeClaims, verifiedClaims } from "@/lib/viewer";
+import { getOwnerPositions } from "@/lib/queries";
 import { money } from "@/lib/format";
+import { DemoWells } from "./_demo";
 
-const boe12 = (hist: { oil: number; gas: number }[]) =>
-  hist.slice(-12).map((m) => m.oil + m.gas / 6);
+export const metadata = { title: "Holdings" };
+export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Your wells" };
+/**
+ * The owner's recorded interests, one row per interest — lease-grain,
+ * because Texas reports production by LEASE and the appraisal roll
+ * enumerates interests against leases. Decimals and assessed values are the
+ * county's public record. Dollar rates appear only for verified claims.
+ */
+export default async function HoldingsPage() {
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind === "demo") return <DemoWells />;
 
-export default function WellsPage() {
-  const deck = getDeck();
-  const rows = ownerPositions()
-    .map((p) => ({
-      ...p,
-      ttm: sumNet(historyNet(p.well, p.interest, deck, 12)),
-      next12: sumNet(forecastNet(p.well, p.interest, deck, 12)),
-    }))
-    .sort((a, b) => b.next12 - a.next12);
+  const claims = activeClaims(viewer);
+  if (claims.length === 0) redirect("/onboarding");
+  const showDollars = verifiedClaims(viewer).length > 0;
+  const positions = await getOwnerPositions(claims[0].ownerId);
 
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Your wells</h1>
-        <p className="text-[13px] text-ink-3">{rows.length} interests, ranked by forward value</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Holdings</h1>
+        <p className="text-[13px] text-ink-3">
+          {positions.length.toLocaleString()} interests · county appraisal roll, as filed
+        </p>
       </div>
-      <div className="card mt-6 overflow-x-auto p-2">
-        <table className="w-full min-w-[760px] border-collapse">
+
+      <div className="card mt-5 overflow-x-auto">
+        <table className="w-full text-[13.5px]">
           <thead>
-            <tr>
-              <th className="table-th">Well</th>
-              <th className="table-th">Operator</th>
-              <th className="table-th">County</th>
-              <th className="table-th">Status</th>
-              <th className="table-th">12-mo trend</th>
-              <th className="table-th text-right">Your decimal</th>
-              <th className="table-th text-right">Trailing 12 mo</th>
-              <th className="table-th text-right">Next 12 mo, modeled</th>
+            <tr className="border-b border-line text-left text-[12px] text-ink-3">
+              <th className="px-4 py-2.5 font-semibold">Property / lease</th>
+              <th className="px-3 py-2.5 font-semibold">County</th>
+              <th className="px-3 py-2.5 font-semibold">Operator</th>
+              <th className="px-3 py-2.5 text-right font-semibold">Decimal</th>
+              <th className="px-3 py-2.5 text-right font-semibold">Assessed</th>
+              <th className="px-3 py-2.5 text-right font-semibold">Oil bbl/mo (yours)</th>
+              {showDollars && (
+                <th className="px-4 py-2.5 text-right font-semibold">Gross $/mo</th>
+              )}
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={r.interest.id} className="hover:bg-paper-deep">
-                <td className="table-td">
-                  <Link href={`/app/wells/${r.well.api}`} className="font-medium text-pine hover:underline">
-                    {r.well.name}
-                  </Link>
-                  <span className="block text-[11.5px] text-ink-3">
-                    API {r.well.api} · {r.well.formation}
-                  </span>
+            {positions.map((p) => (
+              <tr key={p.interestId} className="border-b border-line/60 last:border-0">
+                <td className="px-4 py-2.5">
+                  <span className="font-medium">{p.propertyName}</span>
+                  {p.rrcLeaseNo && (
+                    <span className="figures ml-2 text-[11px] text-ink-3">RRC {p.rrcLeaseNo}</span>
+                  )}
+                  {p.basis === "allocated" && (
+                    <span className="ml-2 rounded-full bg-paper-deep px-1.5 py-0.5 text-[10px] font-semibold text-ink-3"
+                          title="Production is split between tracts by appraised royalty value">
+                      allocated
+                    </span>
+                  )}
                 </td>
-                <td className="table-td text-[13.5px]">
-                  <Link href={`/app/operators/${r.well.operatorSlug}`} className="text-pine hover:underline">
-                    {r.well.operatorSlug.split("-").map((s) => s[0].toUpperCase() + s.slice(1)).join(" ")}
-                  </Link>
+                <td className="px-3 py-2.5 text-ink-2">{p.county}</td>
+                <td className="px-3 py-2.5 text-ink-2">{p.operator ?? "—"}</td>
+                <td className="figures px-3 py-2.5 text-right">{p.decimal ? p.decimal.toFixed(6) : "—"}</td>
+                <td className="figures px-3 py-2.5 text-right">{money(p.assessedValue ?? 0)}</td>
+                <td className="figures px-3 py-2.5 text-right">
+                  {p.monthsCovered > 0 ? p.oilBblPerMonth.toFixed(1) : "—"}
                 </td>
-                <td className="table-td text-[13.5px] text-ink-2">{r.well.county}</td>
-                <td className="table-td"><StatusPill status={r.well.status} /></td>
-                <td className="table-td"><Sparkline vals={boe12(r.well.hist)} /></td>
-                <td className="table-td figures text-right text-[13px]">{r.interest.decimal.toFixed(8)}</td>
-                <td className="table-td figures text-right">{money(r.ttm)}</td>
-                <td className="table-td figures text-right font-semibold text-pine">{money(r.next12)}</td>
+                {showDollars && (
+                  <td className="figures px-4 py-2.5 text-right">
+                    {p.monthsCovered > 0 ? money(p.grossRevenuePerMonth) : "—"}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-[12.5px] text-ink-3">
-        Trailing figures are modeled from reported production at the demo deck;
-        forward figures are decline forecasts priced at the published deck. Upload statements
-        (Owner plan) to replace models with actuals.
+
+      <p className="mt-4 max-w-3xl text-[12px] leading-relaxed text-ink-3">
+        Decimals and assessed values are the county appraisal roll&rsquo;s own figures. Volume rates
+        are Railroad Commission lease-level production normalized per month, multiplied by your
+        decimal; &ldquo;allocated&rdquo; rows split lease production between tracts by appraised royalty
+        value, which is an estimate. {showDollars
+          ? "Dollar figures are gross at a flat reference price — before severance tax and post-production deductions, so they run high against a real check."
+          : "Dollar rates unlock when your claim is verified."} Operator statements govern actual payment.
       </p>
     </div>
   );

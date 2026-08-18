@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDeck, ownerPositions } from "@/lib/data";
@@ -10,7 +12,13 @@ export const metadata = { title: "Offer RO-2026-0001" };
  *  math. All figures computed live from the same model the rest of the app
  *  uses, so the offer can never drift from the numbers the owner already
  *  trusts. */
-export default function OfferPage({ params }: { params: { id: string } }) {
+export default async function OfferPage({ params }: { params: { id: string } }) {
+  // Demo-only surface: nothing real behind it yet. A signed-in owner is
+  // routed home rather than shown fiction.
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+  if (viewer.kind !== "demo") redirect("/app");
+
   if (params.id !== "RO-2026-0001") notFound();
 
   const deck = getDeck();
