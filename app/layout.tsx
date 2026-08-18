@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Newsreader, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -36,10 +37,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
-      <body className="bg-paper text-ink font-sans antialiased">
-        {children}
-      </body>
-    </html>
+    // Clerk's own UI inherits the house palette so a sign-in screen does not
+    // look like a bolted-on third party. Brand tokens live in tailwind.config.
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#1f4b3f",
+          colorText: "#14201c",
+          colorBackground: "#ffffff",
+          borderRadius: "0.35rem",
+        },
+      }}
+    >
+      <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+        <body className="bg-paper text-ink font-sans antialiased">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

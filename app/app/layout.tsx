@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { UserButton } from "@clerk/nextjs";
+import { getOrCreateUser } from "@/lib/user";
 import { Seal, Wordmark } from "@/components/Brand";
 import { getOwner, latestMonth } from "@/lib/data";
 import { AppNav } from "@/components/AppNav";
@@ -11,17 +14,29 @@ export const metadata = { title: "Dashboard" };
  *  and cookie-gated, and a static copy would be served before the gate runs. */
 export const dynamic = "force-dynamic";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = cookies().get("ro_demo_session");
-  if (!session) redirect("/login");
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  // Two ways in. Clerk is the real one. The demo cookie survives only where
+  // the demo routes themselves survive — development — so production has a
+  // single door.
+  const { userId } = await auth();
+  const demo =
+    process.env.NODE_ENV !== "production" && cookies().get("ro_demo_session");
+  if (!userId && !demo) redirect("/login");
+
+  // Materialise the app.users row on first authenticated request. Entitlement
+  // still comes from that row, never from the Clerk session.
+  if (userId) await getOrCreateUser();
+
   const owner = getOwner();
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* demo ribbon */}
-      <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
-        DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.
-      </div>
+      {demo && !userId && (
+        <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
+          DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.
+        </div>
+      )}
 
       <header className="border-b border-line bg-paper-card">
         <div className="mx-auto flex max-w-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
@@ -40,9 +55,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/app/settings" className="text-sm font-medium text-ink-2 hover:text-ink">
               Settings
             </Link>
-            <a href="/api/demo-logout" className="text-sm font-medium text-ink-2 hover:text-ink">
-              Sign out
-            </a>
+            {userId ? (
+              <UserButton afterSignOutUrl="/" />
+            ) : (
+              <a href="/api/demo-logout" className="text-sm font-medium text-ink-2 hover:text-ink">
+                Exit demo
+              </a>
+            )}
           </div>
         </div>
         <AppNav />
