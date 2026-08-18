@@ -20,10 +20,11 @@ export default function ClaimPage() {
           <ClaimFlow />
         </div>
         <p className="mt-10 text-[12.5px] leading-relaxed text-ink-3">
-          This demo searches a small fictional index. The live beta searches
-          31,331 owner names from the mineral appraisal rolls of Martin and
-          Karnes counties — if your minerals are elsewhere in Texas, we do not
-          have you on file yet. Ownership rolls are public records; cashflow
+          Search covers 1.28 million owner names from the mineral appraisal
+          rolls of 207 Texas counties — public records, shown as the county
+          filed them. Full production dashboards are live where county rolls
+          link to Railroad Commission leases; everywhere else you&rsquo;ll see
+          ownership and the county&rsquo;s own assessed value first. Cashflow
           detail unlocks only after verification.
         </p>
       </section>

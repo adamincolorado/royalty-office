@@ -227,6 +227,59 @@ export async function getOwnerSummary(ownerId: number): Promise<OwnerSummary | n
 }
 
 /** Coverage figures for the marketing surface — real, not asserted. */
+export interface IndexHit {
+  name: string;
+  county: string;
+  interests: number;
+  leases: number;
+  operators: number;
+  assessedValue: number | null;
+  claimable: boolean;
+  countyStatus: string;    // 'live' | 'partial' | 'indexed' | 'queued' | 'building' | 'failed'
+  readyNow: boolean;
+}
+
+/**
+ * Statewide claim-funnel search — core.v_owner_search, the 1.28M-name index
+ * built from the CAD rolls (mig 016). This is the tier-1 promise: "do we
+ * have you, and roughly how much is there" for ~every mineral owner in
+ * Texas, WITHOUT the county being loaded. It never carries a forecast, a
+ * price, or a decimal — assessed value is the county's own public number.
+ *
+ * searchOwners() above stays for the post-claim world: it hits core.owners,
+ * which only holds detail-loaded (live) counties.
+ *
+ * Match strategy: prefix on the normalized name (rolls are LAST FIRST, and
+ * people type surnames) OR trigram similarity for the constant misspellings
+ * in county data. Both arms are indexed (unique btree / gin_trgm).
+ */
+export async function searchIndex(term: string, limit = 60): Promise<IndexHit[]> {
+  const needle = term.trim().toUpperCase().replace(/\s+/g, " ").slice(0, 80);
+  if (needle.length < 3) return [];
+  const rows = await q(
+    `SELECT name, county, interests, leases, operators, assessed_value,
+            is_claimable, county_status, ready_now,
+            greatest(similarity(name_norm, $1),
+                     (name_norm LIKE $1 || '%')::int) AS rank
+       FROM core.v_owner_search
+      WHERE name_norm LIKE $1 || '%' OR name_norm % $1
+      ORDER BY rank DESC, assessed_value DESC NULLS LAST, interests DESC
+      LIMIT $2`,
+    [needle, limit],
+  );
+  return rows.map((r) => ({
+    name: String(r.name),
+    county: String(r.county),
+    interests: num(r.interests),
+    leases: num(r.leases),
+    operators: num(r.operators),
+    assessedValue: r.assessed_value == null ? null : num(r.assessed_value),
+    claimable: Boolean(r.is_claimable),
+    countyStatus: String(r.county_status),
+    readyNow: Boolean(r.ready_now),
+  }));
+}
+
 export async function getPlatformStats(): Promise<{
   interests: number; owners: number; leases: number; counties: number;
 }> {
