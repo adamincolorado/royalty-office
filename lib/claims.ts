@@ -22,13 +22,14 @@ export async function createClaim(
   appUserId: string,
   ownerId: number,
 ): Promise<ClaimResult> {
+  // owner_identities is keyed by identity, not owner: core.owners carries
+  // identity_id (mig 013). An owner with no identity row is claimable —
+  // the bar list only ever adds restrictions.
   const owner = await q1<{ owner_id: string; barred: boolean | null }>(
-    `SELECT o.owner_id,
-            bool_or(NOT oi.is_claimable) AS barred
+    `SELECT o.owner_id, (oi.is_claimable IS FALSE) AS barred
        FROM core.owners o
-       LEFT JOIN core.owner_identities oi ON oi.owner_id = o.owner_id
-      WHERE o.owner_id = $1
-      GROUP BY o.owner_id`,
+       LEFT JOIN core.owner_identities oi ON oi.identity_id = o.identity_id
+      WHERE o.owner_id = $1`,
     [ownerId],
   );
   if (!owner) return { ok: false, reason: "owner-not-found" };
