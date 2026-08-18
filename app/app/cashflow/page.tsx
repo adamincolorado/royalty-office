@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { getViewer, activeClaims, verifiedClaims } from "@/lib/viewer";
+import { getViewer, activeClaims, selectedClaim, unlocksMoney } from "@/lib/viewer";
+import { ClaimSwitcher } from "@/components/ClaimSwitcher";
 import { getOwnerHistory, getOwnerForecast } from "@/lib/queries";
 import { money } from "@/lib/format";
 import { DemoCashflow } from "./_demo";
@@ -13,18 +14,22 @@ export const dynamic = "force-dynamic";
  * stops at each lease's economic limit. Verified claims only — this page is
  * the paywall's reason to exist and the ladder's top rung.
  */
-export default async function CashflowPage() {
+export default async function CashflowPage(
+  { searchParams }: { searchParams?: { claim?: string } },
+) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   if (viewer.kind === "demo") return <DemoCashflow />;
 
   const claims = activeClaims(viewer);
   if (claims.length === 0) redirect("/onboarding");
-  const claim = claims[0];
+  const claim = selectedClaim(viewer, Number(searchParams?.claim) || undefined);
+  if (!claim) redirect("/onboarding");
 
-  if (verifiedClaims(viewer).length === 0) {
+  if (!unlocksMoney(claim)) {
     return (
       <div className="mx-auto max-w-xl">
+        <ClaimSwitcher claims={claims} current={claim.claimId} />
         <h1 className="font-display text-2xl font-semibold tracking-tight">Cashflow &amp; forecast</h1>
         <div className="card mt-5 border-brass p-6">
           <h2 className="font-display text-lg font-semibold">Unlocks at verification</h2>
@@ -43,6 +48,7 @@ export default async function CashflowPage() {
   const history = await getOwnerHistory(claim.ownerId, 24);
   const forecast = await getOwnerForecast(claim.ownerId, 36);
   const h12 = history.slice(-12).reduce((s, m) => s + m.grossRevenue, 0);
+  const through = history.length ? history[history.length - 1].month : null;
   const f12 = forecast.months.slice(0, 12).reduce((s, m) => s + m.grossRevenue, 0);
   const f36 = forecast.months.reduce((s, m) => s + m.grossRevenue, 0);
 
@@ -51,13 +57,15 @@ export default async function CashflowPage() {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Cashflow &amp; forecast</h1>
         <p className="text-[13px] text-ink-3">
-          gross to your decimals · ${forecast.oilPrice}/bbl held flat ({forecast.priceDeck})
+          gross to your decimals · ${forecast.oilPrice}/bbl held flat {forecast.priceDeck !== "none" ? " (" + forecast.priceDeck + ")" : ""}
         </p>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="card p-4">
-          <p className="text-[12px] font-semibold text-ink-3">Trailing 12 months, gross</p>
+          <p className="text-[12px] font-semibold text-ink-3">
+            {through ? "12 reported months to " + through + ", gross" : "Reported, gross"}
+          </p>
           <p className="figures mt-1 text-2xl font-semibold">{money(h12)}</p>
         </div>
         <div className="card p-4">

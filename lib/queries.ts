@@ -254,7 +254,20 @@ export async function getOwnerHistory(ownerId: number, months = 24): Promise<Own
       WHERE mi.owner_id = $1
         AND mi.interest_type IN ('RI','ORRI')
         AND pm.level = 'lease' AND pm.period_months = 1
-        AND pm.month >= (date_trunc('month', now()) - ($2 || ' months')::interval)
+        -- Anchored on the owner's OWN last reported month, not on now().
+        -- RRC reporting lags 2-4 months, so a now()-anchored 12-month window
+        -- returned 11 buckets for every owner in the database (10.1% low in
+        -- aggregate) and returned NOTHING for gas owners, whose ledger is
+        -- further behind — the same owner then showed $0 on Overview and
+        -- $108 on Cashflow. One definition, used by both pages.
+        AND pm.month > ((SELECT max(pm2.month)
+                           FROM core.mineral_interests mi2
+                           JOIN core.interest_revenue_basis b2 ON b2.interest_id = mi2.interest_id
+                           JOIN core.production_monthly pm2 ON pm2.lease_id = mi2.lease_id
+                          WHERE mi2.owner_id = $1
+                            AND mi2.interest_type IN ('RI','ORRI')
+                            AND pm2.level = 'lease' AND pm2.period_months = 1)
+                        - ($2 || ' months')::interval)
       GROUP BY 1 ORDER BY 1`,
     [ownerId, months],
   );
@@ -381,16 +394,33 @@ export interface IndexHit {
 export async function searchIndex(term: string, limit = 60): Promise<IndexHit[]> {
   const needle = term.trim().toUpperCase().replace(/\s+/g, " ").slice(0, 80);
   if (needle.length < 3) return [];
+  // ESCAPE LIKE METACHARACTERS. Unescaped, a visitor typing "%%%" turns the
+  // indexed prefix scan into a parallel sequential scan of all 1.28M rows
+  // (~2.6s and ~170MB of buffers per request, measured) on an endpoint that
+  // needs no login — a free denial of service — and dumps the top of the
+  // index besides. Escaped, the pattern can only ever match a literal.
+  const likeNeedle = needle.replace(/[\%_]/g, (ch) => "\\" + ch);
+  // The trigram arm needs the same protection by a different route: escaping
+  // does nothing for `name_norm % $1`, and a term of pure punctuation ("%%%")
+  // has no usable trigrams, so the planner falls back to a parallel seq scan
+  // of the whole index (2.2s measured). A name search needs three real
+  // characters; anything less is not a search, it is a scan.
+  const alnum = needle.replace(/[^A-Z0-9]/g, "");
+  if (alnum.length < 3) return [];
   const rows = await q(
     `SELECT name, county, interests, leases, operators, assessed_value,
             is_claimable, county_status, ready_now,
             greatest(similarity(name_norm, $1),
-                     (name_norm LIKE $1 || '%')::int) AS rank
+                     (name_norm LIKE $3 || '%' ESCAPE '\')::int,
+                     -- an exact hit must outrank every longer prefix: someone
+                     -- typing their full name should not be pushed off the
+                     -- page by richer strangers who merely start the same way
+                     (name_norm = $1)::int * 2) AS rank
        FROM core.v_owner_search
-      WHERE name_norm LIKE $1 || '%' OR name_norm % $1
+      WHERE name_norm LIKE $3 || '%' ESCAPE '\' OR name_norm % $1
       ORDER BY rank DESC, assessed_value DESC NULLS LAST, interests DESC
       LIMIT $2`,
-    [needle, limit],
+    [needle, limit, likeNeedle],
   );
   return rows.map((r) => ({
     name: String(r.name),

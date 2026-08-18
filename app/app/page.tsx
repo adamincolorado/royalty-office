@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getViewer, activeClaims, verifiedClaims } from "@/lib/viewer";
+import { getViewer, activeClaims, selectedClaim, unlocksMoney } from "@/lib/viewer";
+import { ClaimSwitcher } from "@/components/ClaimSwitcher";
 import { getOwnerSummary, getOwnerHistory, getOwnerForecast } from "@/lib/queries";
 import { money } from "@/lib/format";
 import { DemoDashboard } from "./_demo";
@@ -15,26 +16,33 @@ export const dynamic = "force-dynamic";
  * only for VERIFIED claims and only from core.publishable_forecasts, the
  * view that enforces the engineering standard.
  */
-export default async function OverviewPage() {
+export default async function OverviewPage(
+  { searchParams }: { searchParams?: { claim?: string } },
+) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   if (viewer.kind === "demo") return <DemoDashboard />;
 
   const claims = activeClaims(viewer);
   if (claims.length === 0) redirect("/onboarding");
-  const verified = verifiedClaims(viewer);
-  const claim = claims[0];
+  // Entitlement follows THIS claim, never the account (see lib/viewer.ts).
+  const claim = selectedClaim(viewer, Number(searchParams?.claim) || undefined);
+  if (!claim) redirect("/onboarding");
+  const showMoney = unlocksMoney(claim);
 
   const summary = await getOwnerSummary(claim.ownerId);
   if (!summary) redirect("/onboarding");
   const history = await getOwnerHistory(claim.ownerId, 12);
-  const forecast = verified.length > 0 ? await getOwnerForecast(claim.ownerId, 12) : null;
+  const forecast = showMoney ? await getOwnerForecast(claim.ownerId, 12) : null;
   const next12 = forecast ? forecast.months.reduce((s, m) => s + m.grossRevenue, 0) : null;
   const last12 = history.reduce((s, m) => s + m.grossRevenue, 0);
-  const maxRev = Math.max(...history.map((m) => m.grossRevenue), 1);
+  // Math.max(...[]) is -Infinity, which turns every bar height into NaN.
+  const maxRev = history.length ? Math.max(...history.map((m) => m.grossRevenue), 1) : 1;
+  const through = history.length ? history[history.length - 1].month : null;
 
   return (
     <div>
+      <ClaimSwitcher claims={claims} current={claim.claimId} />
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-2xl font-semibold tracking-tight">{summary.name}</h1>
         <p className="text-[13px] text-ink-3">
@@ -59,13 +67,23 @@ export default async function OverviewPage() {
         </div>
         <div className="card p-4">
           <p className="text-[12px] font-semibold text-ink-3">
-            {verified.length > 0 ? "Last-12-month gross royalty" : "Gross royalty (locked)"}
+            {!showMoney
+              ? "Gross royalty (locked)"
+              : through
+                ? "Gross royalty, 12 reported months to " + through
+                : "Gross royalty"}
           </p>
-          {verified.length > 0 ? (
-            <>
-              <p className="figures mt-1 text-2xl font-semibold">{money(last12)}</p>
-              <p className="text-[11px] text-ink-3">before severance &amp; deductions</p>
-            </>
+          {showMoney ? (
+            history.length > 0 ? (
+              <>
+                <p className="figures mt-1 text-2xl font-semibold">{money(last12)}</p>
+                <p className="text-[11px] text-ink-3">before severance &amp; deductions</p>
+              </>
+            ) : (
+              <p className="mt-1 text-[13px] leading-snug text-ink-2">
+                No production reported on these interests.
+              </p>
+            )
           ) : (
             <p className="mt-1 text-[13px] leading-snug text-ink-2">
               Unlocks when your claim is verified.
@@ -74,7 +92,7 @@ export default async function OverviewPage() {
         </div>
       </div>
 
-      {verified.length > 0 ? (
+      {showMoney && history.length > 0 ? (
         <div className="card mt-6 p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="font-display text-lg font-semibold">Gross royalty by month</h2>
@@ -109,10 +127,20 @@ export default async function OverviewPage() {
                   forecast (insufficient history) and contribute nothing here
                 </>
               )}
-              . Price held flat at ${forecast.oilPrice}/bbl ({forecast.priceDeck}); we do not
-              forecast prices.
+              . Price held flat at ${forecast.oilPrice}/bbl — a reference price, not a
+              market forecast; we do not predict prices.
             </p>
           )}
+        </div>
+      ) : showMoney ? (
+        <div className="card mt-6 p-5">
+          <h2 className="font-display text-lg font-semibold">No reported production</h2>
+          <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-2">
+            These interests carry no Railroad Commission production we can tie to
+            them, so there is no cashflow history to chart and no forecast to
+            publish. Your recorded interests and the county&rsquo;s assessed values
+            are below.
+          </p>
         </div>
       ) : (
         <div className="card mt-6 border-brass p-5">

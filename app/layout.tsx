@@ -32,7 +32,11 @@ export const metadata: Metadata = {
   // www is the serving host; the apex redirects to it. Declaring the apex
   // here made every generated URL a redirect target.
   metadataBase: new URL(SITE_ORIGIN),
-  alternates: { canonical: "/" },
+  // NO canonical here. A root-layout canonical is INHERITED by every page
+  // that does not override it, so setting "/" told crawlers that /pricing,
+  // /claim, /texas and both legal pages were all duplicates of the homepage
+  // — while the sitemap advertised them for indexing. Pages that need one
+  // set their own.
   // Nothing is indexable while the record pages render fixture data.
   robots: PUBLIC_RECORD_PAGES_ARE_REAL ? undefined : { index: true, follow: true },
 };

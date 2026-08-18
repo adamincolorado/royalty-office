@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { getViewer, activeClaims, verifiedClaims } from "@/lib/viewer";
+import { getViewer, activeClaims, selectedClaim, unlocksMoney } from "@/lib/viewer";
+import { ClaimSwitcher } from "@/components/ClaimSwitcher";
 import { getOwnerPositions } from "@/lib/queries";
 import { money } from "@/lib/format";
 import { DemoWells } from "./_demo";
@@ -13,18 +14,23 @@ export const dynamic = "force-dynamic";
  * enumerates interests against leases. Decimals and assessed values are the
  * county's public record. Dollar rates appear only for verified claims.
  */
-export default async function HoldingsPage() {
+export default async function HoldingsPage(
+  { searchParams }: { searchParams?: { claim?: string } },
+) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   if (viewer.kind === "demo") return <DemoWells />;
 
   const claims = activeClaims(viewer);
   if (claims.length === 0) redirect("/onboarding");
-  const showDollars = verifiedClaims(viewer).length > 0;
-  const positions = await getOwnerPositions(claims[0].ownerId);
+  const claim = selectedClaim(viewer, Number(searchParams?.claim) || undefined);
+  if (!claim) redirect("/onboarding");
+  const showDollars = unlocksMoney(claim);
+  const positions = await getOwnerPositions(claim.ownerId);
 
   return (
     <div>
+      <ClaimSwitcher claims={claims} current={claim.claimId} />
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Holdings</h1>
         <p className="text-[13px] text-ink-3">

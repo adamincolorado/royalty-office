@@ -40,6 +40,36 @@ export function verifiedClaims(v: Viewer): Claim[] {
   return v.claims.filter((c) => c.status === "verified");
 }
 
+/**
+ * The claim a page is showing, and whether ITS OWN status unlocks money.
+ *
+ * ENTITLEMENT IS PER CLAIM, NOT PER ACCOUNT. Pages used to select the owner
+ * with activeClaims()[0] while gating dollars on "does this account hold any
+ * verified claim at all" — two different questions. A user who verified one
+ * record (instant, via check stub) could then file a pending claim on ANY
+ * other owner and, because claims are ordered by requested_at and that order
+ * is theirs to control, see that stranger's full cashflow history and
+ * forecast. It also fired by accident: an heir who claims a parent's estate
+ * first, then verifies their own record, would see the estate's cashflow
+ * before the estate's mailed PIN ever arrived.
+ */
+export function selectedClaim(v: Viewer, claimId?: number): Claim | null {
+  const active = activeClaims(v);
+  if (active.length === 0) return null;
+  if (claimId != null) {
+    const picked = active.find((c) => c.claimId === claimId);
+    if (picked) return picked;
+  }
+  // Default to a verified claim when one exists — the account's own record
+  // is what they came to see — otherwise the earliest pending one.
+  return active.find((c) => c.status === "verified") ?? active[0];
+}
+
+/** Money and forecasts unlock on THIS claim's verification, nothing else. */
+export function unlocksMoney(claim: Claim | null): boolean {
+  return claim?.status === "verified";
+}
+
 export async function getViewer(): Promise<Viewer | null> {
   const { userId } = await auth();
   if (userId) {
