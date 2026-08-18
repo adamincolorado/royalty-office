@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { SITE_ORIGIN, PUBLIC_RECORD_PAGES_ARE_REAL } from "@/lib/site";
 import { Newsreader, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -28,7 +29,12 @@ export const metadata: Metadata = {
     "Texas mineral and royalty owners: see your wells, your cashflow, and " +
     "what's coming next — built from the public record, explained in plain " +
     "English.",
-  metadataBase: new URL("https://royaltyoffice.com"),
+  // www is the serving host; the apex redirects to it. Declaring the apex
+  // here made every generated URL a redirect target.
+  metadataBase: new URL(SITE_ORIGIN),
+  alternates: { canonical: "/" },
+  // Nothing is indexable while the record pages render fixture data.
+  robots: PUBLIC_RECORD_PAGES_ARE_REAL ? undefined : { index: true, follow: true },
 };
 
 export default function RootLayout({

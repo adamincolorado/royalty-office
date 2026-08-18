@@ -7,13 +7,19 @@ import { getWell, getWells, getOperator } from "@/lib/data";
 import { forecastGross } from "@/lib/arps";
 import { num } from "@/lib/format";
 
+
+
 export function generateStaticParams() {
   return getWells().map((w) => ({ api: w.api }));
 }
 
 export function generateMetadata({ params }: { params: { api: string } }) {
+  // FIXTURE_NOINDEX — renders demo records today. Keep it out of the index
+  // until it reads from core.*; an invented well or operator page indexed
+  // under this domain is a credibility problem, not just an SEO one.
+  const noindex = { robots: { index: false, follow: false } };
   const w = getWell(params.api);
-  return { title: w ? `${w.name} · API ${w.api}` : "Well" };
+  return { ...noindex, title: w ? `${w.name} · API ${w.api}` : "Well" };
 }
 
 export default function PublicWellPage({ params }: { params: { api: string } }) {

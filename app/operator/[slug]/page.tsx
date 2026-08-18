@@ -5,13 +5,19 @@ import { StatusPill } from "@/components/StatusPill";
 import { getOperator, getOperators, wellsByOperator, getCounty } from "@/lib/data";
 import { num } from "@/lib/format";
 
+
+
 export function generateStaticParams() {
   return getOperators().map((o) => ({ slug: o.slug }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }) {
+  // FIXTURE_NOINDEX — renders demo records today. Keep it out of the index
+  // until it reads from core.*; an invented well or operator page indexed
+  // under this domain is a credibility problem, not just an SEO one.
+  const noindex = { robots: { index: false, follow: false } };
   const o = getOperator(params.slug);
-  return { title: o ? `${o.name} — operator profile` : "Operator" };
+  return { ...noindex, title: o ? `${o.name} — operator profile` : "Operator" };
 }
 
 export default function OperatorPage({ params }: { params: { slug: string } }) {

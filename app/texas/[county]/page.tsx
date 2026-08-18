@@ -5,13 +5,19 @@ import { StatusPill } from "@/components/StatusPill";
 import { getCounties, getCounty, getOperators, wellsByCounty } from "@/lib/data";
 import { num } from "@/lib/format";
 
+
+
 export function generateStaticParams() {
   return getCounties().map((c) => ({ county: c.slug }));
 }
 
 export function generateMetadata({ params }: { params: { county: string } }) {
+  // FIXTURE_NOINDEX — renders demo records today. Keep it out of the index
+  // until it reads from core.*; an invented well or operator page indexed
+  // under this domain is a credibility problem, not just an SEO one.
+  const noindex = { robots: { index: false, follow: false } };
   const c = getCounty(params.county);
-  return { title: c ? `${c.name} County, Texas — wells & operators` : "County" };
+  return { ...noindex, title: c ? `${c.name} County, Texas — wells & operators` : "County" };
 }
 
 export default function CountyPage({ params }: { params: { county: string } }) {

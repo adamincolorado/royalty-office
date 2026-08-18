@@ -32,11 +32,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-col">
       {/* demo ribbon */}
-      {demo && !userId && (
-        <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
-          DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.
-        </div>
-      )}
+      {/* The label belongs to the DATA, not to the visitor. An earlier version
+          hid this whenever someone was signed in, which meant the one class of
+          user who most needs to know they are looking at a fictional portfolio
+          — a real, authenticated owner — was the only one who never saw it. */}
+      <div className="bg-brass px-4 py-1.5 text-center text-[12px] font-semibold text-pine">
+        {userId ? (
+          <>PREVIEW — sample portfolio, not your interests. Your own data appears once you claim it.</>
+        ) : (
+          <>DEMO — fictional owner, fictional wells, demo price deck. Data through {latestMonth()}.</>
+        )}
+      </div>
 
       <header className="border-b border-line bg-paper-card">
         <div className="mx-auto flex max-w-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
@@ -46,9 +52,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Seal size={30} />
             </Link>
             <Wordmark className="hidden sm:flex" />
+            {/* Never present the sample owner as if it were this account. */}
             <span className="min-w-0 truncate rounded-full bg-pine-soft px-3 py-1 text-[12px] font-semibold text-pine">
-              <span className="md:hidden">{owner.shortName}</span>
-              <span className="hidden md:inline">{owner.name}</span>
+              {userId ? (
+                <>Sample portfolio</>
+              ) : (
+                <>
+                  <span className="md:hidden">{owner.shortName}</span>
+                  <span className="hidden md:inline">{owner.name}</span>
+                </>
+              )}
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-3.5 sm:gap-4">
