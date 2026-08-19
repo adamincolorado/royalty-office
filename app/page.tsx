@@ -193,12 +193,12 @@ export default function Home() {
               {
                 n: "2",
                 t: "Verify it's you",
-                d: "We mail a code to the address on file with the county — the same address your tax statements go to. Enter it and the card is yours. Moved? A check stub works too.",
+                d: "During the beta we verify each claim by hand — against the address the county has on file, or a recent check stub you send us. We email you when it clears.",
               },
               {
                 n: "3",
                 t: "See everything",
-                d: "Wells, cashflow history, and forward projections at published reference prices. In plain English by default — with a pro mode when you want the full detail.",
+                d: "Your interests lease by lease, what the record shows they earned, and forward projections where the history supports one. In plain English by default — with the assumptions shown when you want the full detail.",
               },
             ].map((s, i) => (
               <Reveal key={s.n} delay={i * 110}>
@@ -277,7 +277,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-wrap px-5 py-20 text-center">
           <Reveal>
             <h2 className="mx-auto max-w-2xl font-display text-[clamp(1.9rem,3.2vw,2.6rem)] font-semibold leading-tight tracking-tight">
-              One missed well pays for a decade of this
+              One missed check pays for a decade of this
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-ink-2">
               Free to claim your card and see every interest recorded in your
@@ -286,7 +286,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex justify-center gap-3.5">
               <Link href="/pricing" className="btn-primary !px-6 !py-3">See pricing</Link>
-              <Link href="/login" className="btn-secondary !px-6 !py-3">How it works</Link>
+              <Link href="/how-it-works" className="btn-secondary !px-6 !py-3">How it works</Link>
             </div>
           </Reveal>
         </div>
