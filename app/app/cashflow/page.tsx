@@ -47,8 +47,20 @@ export default async function CashflowPage(
 
   const history = await getOwnerHistory(claim.ownerId, 24);
   const forecast = await getOwnerForecast(claim.ownerId, 36);
-  const h12 = history.slice(-12).reduce((s, m) => s + m.grossRevenue, 0);
   const through = history.length ? history[history.length - 1].month : null;
+  // Trailing twelve by MONTH BOUNDARY. slice(-12) takes the last 12 ROWS, so
+  // a gap in the store (2024-08 and 2025-04 are absent database-wide) silently
+  // widens the window past a year and disagrees with Overview.
+  const cutoff = through
+    ? (() => {
+        const [y, m] = through.split("-").map(Number);
+        const idx = y * 12 + (m - 1) - 11;
+        return `${Math.floor(idx / 12)}-${String((idx % 12) + 1).padStart(2, "0")}`;
+      })()
+    : null;
+  const h12 = history
+    .filter((m) => !cutoff || m.month >= cutoff)
+    .reduce((s, m) => s + m.grossRevenue, 0);
   const f12 = forecast.months.slice(0, 12).reduce((s, m) => s + m.grossRevenue, 0);
   const f36 = forecast.months.reduce((s, m) => s + m.grossRevenue, 0);
 
@@ -69,12 +81,28 @@ export default async function CashflowPage(
           <p className="figures mt-1 text-2xl font-semibold">{money(h12)}</p>
         </div>
         <div className="card p-4">
-          <p className="text-[12px] font-semibold text-ink-3">Projected next 12, gross</p>
-          <p className="figures mt-1 text-2xl font-semibold">{money(f12)}</p>
+          <p className="text-[12px] font-semibold text-ink-3">
+            Projected next 12, gross{forecast.hasGasRevenue ? " (oil only)" : ""}
+          </p>
+          <p className="figures mt-1 text-2xl font-semibold">
+            {forecast.revenueCoverage >= 0.35 ? money(f12) : "—"}
+          </p>
+          <p className="text-[11px] text-ink-3">
+            covers {Math.round(forecast.revenueCoverage * 100)}% of your reported royalty
+          </p>
         </div>
         <div className="card p-4">
-          <p className="text-[12px] font-semibold text-ink-3">Projected next 36, gross</p>
-          <p className="figures mt-1 text-2xl font-semibold">{money(f36)}</p>
+          <p className="text-[12px] font-semibold text-ink-3">
+            Projected next 36, gross{forecast.hasGasRevenue ? " (oil only)" : ""}
+          </p>
+          <p className="figures mt-1 text-2xl font-semibold">
+            {forecast.revenueCoverage >= 0.35 ? money(f36) : "—"}
+          </p>
+          <p className="text-[11px] text-ink-3">
+            {forecast.revenueCoverage >= 0.35
+              ? `${forecast.leasesForecast} of ${forecast.leasesForecast + forecast.leasesHeldOut} leases`
+              : "too little coverage to total"}
+          </p>
         </div>
       </div>
 
@@ -104,7 +132,22 @@ export default async function CashflowPage(
         </div>
 
         <div className="card p-5">
-          <h2 className="font-display text-lg font-semibold">Forecast — modeled</h2>
+          <h2 className="font-display text-lg font-semibold">
+            Forecast — modeled{forecast.hasGasRevenue ? ", oil only" : ""}
+          </h2>
+          {forecast.startsAfter && (
+            <p className="mt-1 text-[12px] text-ink-3">
+              Begins the month after your last reported month ({forecast.startsAfter});
+              Railroad Commission reporting runs two to four months behind, so the most
+              recent months are modeled rather than reported.
+            </p>
+          )}
+          {forecast.hasGasRevenue && (
+            <p className="mt-1 text-[12px] text-ink-3">
+              Part of your royalty is gas. Only oil is forecast, so these figures are
+              lower than a full projection of your position would be.
+            </p>
+          )}
           <p className="mt-1 text-[12px] text-ink-3">
             {forecast.leasesForecast} lease curve{forecast.leasesForecast === 1 ? "" : "s"} past
             the publication gate{forecast.leasesHeldOut > 0 &&

@@ -297,6 +297,16 @@ export interface OwnerForecast {
   leasesHeldOut: number;       // owner's priced leases with NO publishable curve
   priceDeck: string;           // disclosure label, e.g. 'placeholder_flat'
   oilPrice: number;
+  /** Share of the owner's trailing-12 OIL revenue sitting on forecast leases.
+   *  A projection covering 2% of someone's money must never be printed beside
+   *  their full reported total as though the two were comparable. */
+  revenueCoverage: number;
+  /** True when any of the owner's revenue is gas — the fit is oil-only, so
+   *  gas is structurally absent from every forward number. */
+  hasGasRevenue: boolean;
+  /** First forecast month: the month after the owner's last REPORTED month,
+   *  so history and forecast meet instead of leaving a silent gap. */
+  startsAfter: string | null;
 }
 
 /**
@@ -335,8 +345,57 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
     [ownerId],
   );
 
+  // COVERAGE. What share of the owner's actual trailing-12 oil revenue sits on
+  // leases we can forecast, and is any of their money gas? Both answers change
+  // what the page is allowed to say next to the projection.
+  const cov = await q1(
+    `WITH last12 AS (
+       SELECT pm.lease_id,
+              sum(pm.oil_bbl * b.revenue_decimal) AS oil,
+              sum(pm.gas_mcf * b.revenue_decimal) AS gas
+         FROM core.mineral_interests mi
+         JOIN core.interest_revenue_basis b ON b.interest_id = mi.interest_id
+         JOIN core.production_monthly pm ON pm.lease_id = mi.lease_id
+        WHERE mi.owner_id = $1 AND mi.interest_type IN ('RI','ORRI')
+          AND pm.level = 'lease' AND pm.period_months = 1
+          AND pm.month > ((SELECT max(pm2.month)
+                             FROM core.mineral_interests mi2
+                             JOIN core.interest_revenue_basis b2 ON b2.interest_id = mi2.interest_id
+                             JOIN core.production_monthly pm2 ON pm2.lease_id = mi2.lease_id
+                            WHERE mi2.owner_id = $1
+                              AND mi2.interest_type IN ('RI','ORRI')
+                              AND pm2.level = 'lease' AND pm2.period_months = 1)
+                          - interval '12 months')
+        GROUP BY pm.lease_id)
+     SELECT COALESCE(sum(oil), 0)                                    AS oil_total,
+            COALESCE(sum(gas), 0)                                    AS gas_total,
+            COALESCE(sum(oil) FILTER (WHERE EXISTS (
+              SELECT 1 FROM core.publishable_forecasts pf
+               WHERE pf.lease_id = last12.lease_id AND pf.stream = 'oil'
+                 AND pf.econ_limit_month > now())), 0)               AS oil_covered
+       FROM last12`,
+    [ownerId],
+  );
+  const oilTotal = num((cov as Record<string, unknown>)?.oil_total);
+  const gasTotal = num((cov as Record<string, unknown>)?.gas_total);
+  const oilCovered = num((cov as Record<string, unknown>)?.oil_covered);
+
+  // Start the forecast where the record stops, not at today's date: RRC
+  // reporting lags, so anchoring on now() left unreported months in a gap
+  // between the history table and the forecast table with nothing in them.
+  const lastReported = await q1(
+    `SELECT to_char(max(pm.month), 'YYYY-MM') AS m
+       FROM core.mineral_interests mi
+       JOIN core.interest_revenue_basis b ON b.interest_id = mi.interest_id
+       JOIN core.production_monthly pm ON pm.lease_id = mi.lease_id
+      WHERE mi.owner_id = $1 AND mi.interest_type IN ('RI','ORRI')
+        AND pm.level = 'lease' AND pm.period_months = 1`,
+    [ownerId],
+  );
   const now = new Date();
-  const start = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  const start =
+    ((lastReported as Record<string, unknown>)?.m as string) ??
+    `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
   const { monthlyRate, addMonths, monthsBetween } = await import("./arps");
 
   const out: OwnerForecastMonth[] = [];
@@ -346,7 +405,8 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
     for (const r of rows) {
       // The forecast stops at the ECONOMIC LIMIT, never runs to zero rate —
       // a curve past the limit overstates reserves, always (standard sec 2.5).
-      if (String(r.econ_limit) && ym > String(r.econ_limit)) continue;
+      const limit = r.econ_limit == null ? null : String(r.econ_limit);
+      if (limit === null || ym > limit) continue;   // no limit, or past it
       const t = monthsBetween(String(r.t0), ym);
       if (t < 0) continue;
       oil +=
@@ -361,6 +421,9 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
     leasesHeldOut: num((heldOut as Record<string, unknown>)?.n),
     priceDeck: rows.length ? String(rows[0].price_deck) : "none",
     oilPrice: REFERENCE_PRICE.oil,
+    revenueCoverage: oilTotal > 0 ? oilCovered / oilTotal : 0,
+    hasGasRevenue: gasTotal * REFERENCE_PRICE.gas > 0.02 * (gasTotal * REFERENCE_PRICE.gas + oilTotal * REFERENCE_PRICE.oil),
+    startsAfter: ((lastReported as Record<string, unknown>)?.m as string) ?? null,
   };
 }
 

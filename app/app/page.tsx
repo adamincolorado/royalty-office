@@ -116,7 +116,7 @@ export default async function OverviewPage(
             <span>{history[0]?.month}</span>
             <span>{history[history.length - 1]?.month}</span>
           </div>
-          {next12 != null && forecast && (
+          {next12 != null && forecast && forecast.revenueCoverage >= 0.35 && (
             <p className="mt-4 border-t border-line pt-3 text-[13.5px] leading-relaxed text-ink-2">
               Projected next 12 months, gross: <strong className="figures">{money(next12)}</strong>{" "}
               — from {forecast.leasesForecast} lease decline curve
@@ -127,8 +127,28 @@ export default async function OverviewPage(
                   forecast (insufficient history) and contribute nothing here
                 </>
               )}
-              . Price held flat at ${forecast.oilPrice}/bbl — a reference price, not a
-              market forecast; we do not predict prices.
+              . Those curves carry{" "}
+              <strong>{Math.round(forecast.revenueCoverage * 100)}%</strong> of what your
+              interests actually reported over the last year
+              {forecast.hasGasRevenue && ", and gas is not forecast at all — only oil"}.
+              Price held flat at ${forecast.oilPrice}/bbl — a reference price, not a market
+              forecast; we do not predict prices.
+            </p>
+          )}
+          {/* Below a third of the owner's money, a forward total is not a
+              summary of their position — it is a fragment wearing the same
+              typeface as the real number, and the reader cannot tell. */}
+          {next12 != null && forecast && forecast.revenueCoverage < 0.35 && (
+            <p className="mt-4 border-t border-line pt-3 text-[13.5px] leading-relaxed text-ink-2">
+              We are not showing a forward total for you. Only{" "}
+              <strong>{Math.round(forecast.revenueCoverage * 100)}%</strong> of what your
+              interests reported last year sits on leases whose history supports a
+              defensible decline curve
+              {forecast.leasesHeldOut > 0 && (
+                <> — {forecast.leasesHeldOut} of your leases have too little history</>
+              )}
+              , so any projection would describe a fraction of your position while
+              looking like all of it. The reported figures above are unaffected.
             </p>
           )}
         </div>
