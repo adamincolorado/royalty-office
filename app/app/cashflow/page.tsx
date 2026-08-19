@@ -153,6 +153,17 @@ export default async function CashflowPage(
             the publication gate{forecast.leasesHeldOut > 0 &&
               `; ${forecast.leasesHeldOut} lease${forecast.leasesHeldOut === 1 ? "" : "s"} held out — insufficient history to defend a curve`}.
           </p>
+          {forecast.revenueCoverage < 0.35 ? (
+            /* Suppressing the total while publishing every month that sums to
+               it is not a suppression — it hands the reader the addends of the
+               number we just declined to print. */
+            <p className="mt-3 text-[13.5px] leading-relaxed text-ink-2">
+              Withheld. Only {Math.round(forecast.revenueCoverage * 100)}% of what your
+              interests reported last year sits on leases whose history supports a
+              defensible curve, so a month-by-month projection would describe a small
+              corner of your position while looking like the whole of it.
+            </p>
+          ) : (
           <table className="mt-3 w-full text-[13px]">
             <thead>
               <tr className="border-b border-line text-left text-[11.5px] text-ink-3">
@@ -171,6 +182,7 @@ export default async function CashflowPage(
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
 

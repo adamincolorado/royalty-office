@@ -343,6 +343,11 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
        JOIN core.publishable_forecasts f ON f.lease_id = mi.lease_id
       WHERE mi.owner_id = $1 AND mi.interest_type IN ('RI','ORRI')
         AND f.stream = 'oil'
+        -- A curve whose economic limit has already passed is not a forecast,
+        -- it is a dead lease still on the books. Coverage already required
+        -- liveness; the projection itself did not, so the two numbers on the
+        -- tile were computed over different sets of curves.
+        AND f.econ_limit_month > now()
       GROUP BY f.lease_id, f.qi, f.di_nominal, f.b_factor, f.terminal_decline,
                f.t0, f.econ_limit_month, f.price_deck`,
     [ownerId],
@@ -436,7 +441,16 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
     leasesHeldOut: num((heldOut as Record<string, unknown>)?.n),
     priceDeck: rows.length ? String(rows[0].price_deck) : "none",
     oilPrice: REFERENCE_PRICE.oil,
-    revenueCoverage: oilTotal > 0 ? oilCovered / oilTotal : 0,
+    // Divide by ALL reported revenue, not just oil. Oil-over-oil let a
+    // pure-gas owner clear the floor on a rounding error: PACE has $8,278 of
+    // gas across 19 leases and $30.39 of oil on one, so 30.39/30.39 read as
+    // 100% coverage and the page printed an $11 projection beside $8,312 of
+    // reported royalty while claiming the curves carried all of it.
+    revenueCoverage:
+      oilTotal * REFERENCE_PRICE.oil + gasTotal * REFERENCE_PRICE.gas > 0
+        ? (oilCovered * REFERENCE_PRICE.oil) /
+          (oilTotal * REFERENCE_PRICE.oil + gasTotal * REFERENCE_PRICE.gas)
+        : 0,
     hasGasRevenue: gasTotal * REFERENCE_PRICE.gas > 0.02 * (gasTotal * REFERENCE_PRICE.gas + oilTotal * REFERENCE_PRICE.oil),
     startsAfter: ((lastReported as Record<string, unknown>)?.m as string) ?? null,
   };
