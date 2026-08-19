@@ -260,14 +260,27 @@ export async function getOwnerHistory(ownerId: number, months = 24): Promise<Own
         -- aggregate) and returned NOTHING for gas owners, whose ledger is
         -- further behind — the same owner then showed $0 on Overview and
         -- $108 on Cashflow. One definition, used by both pages.
-        AND pm.month > ((SELECT max(pm2.month)
-                           FROM core.mineral_interests mi2
+        -- Anchor on the last month that actually REPORTED volumes, not the
+        -- last month with rows. RRC publishes per county, so the newest month
+        -- exists for some counties while Karnes and Martin are still all
+        -- zeros — 7,830 of 14,689 rows in 2026-06. Anchoring on rows made
+        -- every owner's trailing twelve include one empty month (a median
+        -- 8.1% understatement) and ended every chart on a bar at zero.
+        AND pm.month > ((SELECT max(pm2.month) FROM core.mineral_interests mi2
                            JOIN core.interest_revenue_basis b2 ON b2.interest_id = mi2.interest_id
                            JOIN core.production_monthly pm2 ON pm2.lease_id = mi2.lease_id
                           WHERE mi2.owner_id = $1
                             AND mi2.interest_type IN ('RI','ORRI')
-                            AND pm2.level = 'lease' AND pm2.period_months = 1)
+                            AND pm2.level = 'lease' AND pm2.period_months = 1
+                            AND (pm2.oil_bbl > 0 OR pm2.gas_mcf > 0))
                         - ($2 || ' months')::interval)
+        AND pm.month <= (SELECT max(pm3.month) FROM core.mineral_interests mi3
+                           JOIN core.interest_revenue_basis b3 ON b3.interest_id = mi3.interest_id
+                           JOIN core.production_monthly pm3 ON pm3.lease_id = mi3.lease_id
+                          WHERE mi3.owner_id = $1
+                            AND mi3.interest_type IN ('RI','ORRI')
+                            AND pm3.level = 'lease' AND pm3.period_months = 1
+                            AND (pm3.oil_bbl > 0 OR pm3.gas_mcf > 0))
       GROUP BY 1 ORDER BY 1`,
     [ownerId, months],
   );
@@ -364,7 +377,8 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
                              JOIN core.production_monthly pm2 ON pm2.lease_id = mi2.lease_id
                             WHERE mi2.owner_id = $1
                               AND mi2.interest_type IN ('RI','ORRI')
-                              AND pm2.level = 'lease' AND pm2.period_months = 1)
+                              AND pm2.level = 'lease' AND pm2.period_months = 1
+                              AND (pm2.oil_bbl > 0 OR pm2.gas_mcf > 0))
                           - interval '12 months')
         GROUP BY pm.lease_id)
      SELECT COALESCE(sum(oil), 0)                                    AS oil_total,
@@ -389,7 +403,8 @@ export async function getOwnerForecast(ownerId: number, months = 36): Promise<Ow
        JOIN core.interest_revenue_basis b ON b.interest_id = mi.interest_id
        JOIN core.production_monthly pm ON pm.lease_id = mi.lease_id
       WHERE mi.owner_id = $1 AND mi.interest_type IN ('RI','ORRI')
-        AND pm.level = 'lease' AND pm.period_months = 1`,
+        AND pm.level = 'lease' AND pm.period_months = 1
+        AND (pm.oil_bbl > 0 OR pm.gas_mcf > 0)`,
     [ownerId],
   );
   const now = new Date();
