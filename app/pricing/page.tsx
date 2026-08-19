@@ -26,14 +26,12 @@ const tiers = [
     blurb: "Your cashflow, past and future.",
     features: [
       "Everything in Claimed",
-      "Net cashflow history, priced to your decimal",
-      "Forecasts at published reference prices — 3, 6, 12, 36 months",
-      "Well detail with decline models",
-      "Check-stub upload: modeled vs. actual",
-      "Annual owner report (PDF)",
-      "Monthly email summary",
+      "Gross cashflow history, priced to your decimal",
+      "Decline forecasts where the lease's own history supports one — 12 and 36 months",
+      "Lease detail: operator, decimal, revenue basis, held-out leases named",
+      "Planned: check-stub upload, annual PDF report, monthly email summary",
     ],
-    cta: { label: "Start with the demo", href: "/login" },
+    cta: { label: "Join the beta", href: "/claim" },
     featured: false,
   },
   {
@@ -41,17 +39,18 @@ const tiers = [
     price: "$29",
     cadence: "/month · $279/yr",
     blurb: "Know before the mail does.",
+    // NOT YET BUILT. None of the monitoring data sources are loaded (permits,
+    // well events, satellite) and there is no checkout, so this tier is
+    // presented as planned rather than sold. Move items up as they ship.
     features: [
       "Everything in Owner",
-      "New permits on or near your acreage — daily",
-      "Status changes: permit → pad → frac → completion → first production",
-      "New wells added to your units",
-      "Satellite change detection over your locations (~5-day passes)",
-      "Shut-in watch with dollars-not-flowing",
-      "First-check countdown with the statutory due date",
-      "SMS alerts (arriving with public beta)",
+      "Planned: new permits on or near your acreage",
+      "Planned: status changes — permit, pad, completion, first production",
+      "Planned: shut-in watch with dollars-not-flowing",
+      "Planned: first-check countdown with the statutory due date",
+      "Planned: satellite change detection over your locations",
     ],
-    cta: { label: "Tour the monitoring demo", href: "/login" },
+    cta: { label: "Join the beta", href: "/claim" },
     featured: true,
   },
 ];
@@ -129,13 +128,14 @@ export default function Pricing() {
 
         <div className="mt-10 card flex flex-wrap items-center justify-between gap-4 p-6">
           <div>
-            <h3 className="font-display text-xl font-semibold">Why Sentinel costs what it costs</h3>
+            <h3 className="font-display text-xl font-semibold">Where the beta actually stands</h3>
             <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-2">
-              Satellite monitoring isn&rsquo;t a checkbox — it&rsquo;s a pipeline we run.
-              Imagery is processed <strong className="text-ink">only for locations tied to
-              active Sentinel subscriptions</strong>, plus ten public showcase sites. Your
-              subscription funds the watching of your own acreage; nobody subsidizes
-              acreage no one is watching.
+              Nothing is charged today and there is no checkout. Claimed and Owner
+              features listed above are live for counties whose rolls link to Railroad
+              Commission leases — Karnes and Martin at the moment. Anything marked
+              &ldquo;planned&rdquo; is not built yet, and we would rather say so here than
+              let you discover it after paying. Prices are what we intend to charge
+              when those features ship.
             </p>
           </div>
         </div>

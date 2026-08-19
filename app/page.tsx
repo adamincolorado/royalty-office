@@ -20,21 +20,24 @@ export default function Home() {
           <div>
             <p className="eyebrow anim !text-brass">Texas mineral &amp; royalty owners</p>
             <h1 className="anim d1 mt-4 font-display text-[clamp(2.7rem,5.6vw,4.2rem)] font-semibold leading-[1.02] tracking-[-0.025em]">
-              You own the wells.
+              Your minerals,
               <br />
-              Now <em className="text-brass">see</em> them.
+              finally <em className="text-brass">legible</em>.
             </h1>
             <p className="anim d2 mt-6 max-w-lg text-lg leading-relaxed text-paper/75">
-              Royalty Office shows you what professionals see — your wells,
-              your cashflow, and what your checks should look like next — built
-              from the public record and explained in plain English.
+              Royalty Office shows you what professionals see — every interest
+              recorded in your name, what those leases have produced, and what
+              they are projected to pay — built from the public record and
+              explained in plain English.
             </p>
             <div className="anim d3 mt-8 flex flex-wrap items-center gap-3.5">
               <Link href="/claim" className="btn-brass !px-6 !py-3">
                 Claim your owner card
               </Link>
-              <Link href="/login" className="btn-ghost-paper !px-6 !py-3">
-                See the live demo
+              {/* The demo tour exists only in development, so this used to
+                  send people to a sign-in page with nothing behind it. */}
+              <Link href="/how-it-works" className="btn-ghost-paper !px-6 !py-3">
+                How it works
               </Link>
             </div>
             <p className="anim d4 mt-6 text-[13px] text-paper/50">
@@ -124,7 +127,9 @@ export default function Home() {
             Built from the public record
           </p>
           <div className="flex flex-wrap items-center gap-2.5">
-            {["Texas Railroad Commission", "County Appraisal Rolls", "FracFocus", "Copernicus Sentinel-2", "Texas GLO"].map((s) => (
+            {/* Only sources actually ingested (core.ingest_runs). Naming a
+                source we do not load is a claim we cannot support. */}
+            {["Texas Railroad Commission", "County Appraisal Rolls"].map((s) => (
               <span key={s} className="rounded-full border border-line bg-paper-card px-3 py-1 text-[11.5px] font-medium text-ink-2">
                 {s}
               </span>
@@ -145,15 +150,15 @@ export default function Home() {
           {[
             {
               t: "What do I own?",
-              d: "Every well tied to your name on the county mineral rolls — operator, status, formation, and your decimal in each one. No typing in your interests; we already built the file.",
+              d: "Every interest recorded in your name on the county mineral rolls — the lease, its operator, and your decimal in each one. No typing in your interests; we already built the file.",
             },
             {
               t: "What has it paid?",
-              d: "Monthly production for every well, priced and netted to your decimal. Upload a check stub and we'll show modeled vs. actual — and flag the gaps worth a phone call.",
+              d: "Monthly production reported for each of your leases, priced and applied to your decimal, so you can see what the record says your interests earned.",
             },
             {
               t: "What's coming next?",
-              d: "Engineering-grade decline forecasts priced at the EIA's published energy outlook — never our speculation. Three months, six, twelve, or three years out, per well or across everything you own.",
+              d: "Decline forecasts fit to each lease's own reported history and published only where that history supports them — held at a flat reference price, never a price prediction. Twelve months and three years out.",
             },
           ].map((c, i) => (
             <Reveal key={c.t} delay={i * 90}>
@@ -242,8 +247,8 @@ export default function Home() {
               <p className="eyebrow">Our commitments</p>
               <ul className="mt-5 space-y-5">
                 {[
-                  ["Public sources only", "RRC, county rolls, GLO, FracFocus — never private data about you."],
-                  ["Published prices, not our speculation", "Forecasts are priced at the EIA Short-Term Energy Outlook — a public federal reference, clearly dated. We never predict prices ourselves."],
+                  ["Public sources only", "Railroad Commission production and county appraisal rolls — public records, never private data about you."],
+                  ["We never predict prices", "Forecasts hold a flat reference price and say so on the page. During the beta that reference is $60/bbl; a published federal price deck replaces it before we charge anyone. We model volumes, never prices."],
                   ["Straight about who we are", "Royalty Office is operated by Alamo Exploration LLC, whose affiliates buy and lease minerals. We never sell your data to third parties, and our disclosures say exactly how we use it."],
                   ["Not investment advice", "We show you the math. Decisions — and the professionals you hire for them — are yours."],
                 ].map(([t, d]) => (
@@ -275,13 +280,13 @@ export default function Home() {
               One missed well pays for a decade of this
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-ink-2">
-              Free to claim your card and see your wells. Cashflow and forecasts
-              from $9 a month; full monitoring — permits, status changes, and
-              satellite watch over your acreage — on the Sentinel plan.
+              Free to claim your card and see every interest recorded in your
+              name. Cashflow history and forecasts are part of the beta at no
+              charge; paid plans begin when the monitoring features ship.
             </p>
             <div className="mt-8 flex justify-center gap-3.5">
               <Link href="/pricing" className="btn-primary !px-6 !py-3">See pricing</Link>
-              <Link href="/login" className="btn-secondary !px-6 !py-3">Tour the demo</Link>
+              <Link href="/login" className="btn-secondary !px-6 !py-3">How it works</Link>
             </div>
           </Reveal>
         </div>

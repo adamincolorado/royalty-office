@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getViewer, activeClaims } from "@/lib/viewer";
+import { hasAccepted } from "@/lib/consent";
 import { ClaimAttach } from "@/components/ClaimAttach";
 
 export const metadata = { title: "Claim your interests" };
@@ -21,6 +22,7 @@ export default async function OnboardingPage() {
   const viewer = await getViewer();
   if (!viewer) redirect("/login");
   if (viewer.kind === "demo") redirect("/app");
+  if (!(await hasAccepted(viewer.appUser.user_id))) redirect("/accept");
 
   const existing = activeClaims(viewer);
   const isFirst = existing.length === 0;

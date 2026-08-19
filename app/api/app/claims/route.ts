@@ -8,6 +8,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getOrCreateUser } from "@/lib/user";
 import { createClaim, requestCountyLoad } from "@/lib/claims";
 import { searchOwners } from "@/lib/queries";
+import { hasAccepted } from "@/lib/consent";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
   const appUser = await getOrCreateUser();
   if (!appUser) return NextResponse.json({ error: "no-account" }, { status: 401 });
+  // The UI routes through /accept, but the API is the real boundary.
+  if (!(await hasAccepted(appUser.user_id))) {
+    return NextResponse.json({ error: "terms-not-accepted" }, { status: 403 });
+  }
 
   let body: { ownerId?: number; county?: string };
   try {

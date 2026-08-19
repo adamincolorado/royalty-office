@@ -9,9 +9,9 @@
  * a price, never anything of ours.
  *
  * The earlier version of this component searched a fictional fixture and
- * "verified" identity against the hardcoded string 1874. Real verification
- * is a PIN mailed to the address on the county roll AFTER account creation
- * (app.owner_claims, method 'mail_pin'); this component now ends at signup,
+ * "verified" identity against the hardcoded string 1874. Verification now
+ * happens after account creation and is operated by hand during the beta
+ * (app.owner_claims, method 'manual'); this component ends at signup,
  * carrying the picked identity in localStorage for onboarding to read.
  */
 import { useState } from "react";
@@ -79,8 +79,8 @@ export function ClaimFlow() {
   function pick(g: Group) {
     setPicked(g);
     setStage("account");
-    // Onboarding reads this after signup and starts the real claim
-    // (mailed-PIN verification). Public-record aggregates only.
+    // Onboarding reads this after signup and starts the claim.
+    // Public-record aggregates only.
     try {
       localStorage.setItem(
         "ro_claim_intent",
@@ -160,11 +160,19 @@ export function ClaimFlow() {
                   >
                     <div className="flex items-baseline justify-between gap-3">
                       <p className="font-semibold">{g.name}</p>
-                      <p className="figures shrink-0 text-[13px] text-ink-2">{money(assessed)} assessed</p>
+                      {g.rows.length === 1 && (
+                        <p className="figures shrink-0 text-[13px] text-ink-2">
+                          {money(assessed)} assessed
+                        </p>
+                      )}
                     </div>
+                    {/* One row per county. Two counties under the same name are
+                        usually two different people, so we never present a
+                        summed total as if it were one person's holdings. */}
                     <p className="mt-0.5 text-[13px] text-ink-2">
-                      {interests.toLocaleString()} recorded interest{interests === 1 ? "" : "s"} ·{" "}
-                      {g.rows.map((r) => r.county).join(", ")} Count{g.rows.length === 1 ? "y" : "ies"}
+                      {g.rows.length === 1
+                        ? `${interests.toLocaleString()} recorded interest${interests === 1 ? "" : "s"} in ${g.rows[0].county} County`
+                        : `This name appears in ${g.rows.length} counties — likely more than one owner. Pick yours:`}
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {g.rows.map((r) => (
@@ -175,7 +183,9 @@ export function ClaimFlow() {
                             (r.readyNow ? "bg-pine-soft text-pine" : "bg-paper-deep text-ink-3")
                           }
                         >
-                          {r.county} — {r.readyNow ? "full dashboard ready" : "records indexed"}
+                          {r.county} — {r.interests} interest{r.interests === 1 ? "" : "s"}
+                          {r.assessedValue ? ` · ${money(r.assessedValue)}` : ""}
+                          {r.readyNow ? " · dashboard ready" : " · records indexed"}
                         </span>
                       ))}
                       {!claimable && (
@@ -204,10 +214,10 @@ export function ClaimFlow() {
         <div>
           <h2 className="font-display text-xl font-semibold">Claim {picked.name}</h2>
           <p className="mt-2 text-[14px] leading-relaxed text-ink-2">
-            Create a free account and we&rsquo;ll start verification: a one-time code
-            mailed to the address the county has on file for this owner —
-            usually 3–5 business days. Moved recently? A recent check stub
-            verifies instantly instead.
+            Create a free account and we&rsquo;ll start verification: during the
+            beta a person reviews each claim, using the address the county has
+            on file or a recent check stub you send us. We&rsquo;ll email you when
+            it clears.
           </p>
           <p className="mt-2 text-[13px] leading-relaxed text-ink-3">
             Ownership rolls are public record. Cashflow detail unlocks only

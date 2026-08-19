@@ -4,6 +4,7 @@ import { UserButton } from "@clerk/nextjs";
 import { Seal, Wordmark } from "@/components/Brand";
 import { getOwner, latestMonth } from "@/lib/data";
 import { getViewer, activeClaims } from "@/lib/viewer";
+import { hasAccepted } from "@/lib/consent";
 import { AppNav } from "@/components/AppNav";
 
 export const metadata = { title: "Dashboard" };
@@ -21,6 +22,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!viewer) redirect("/login");
 
   const isDemo = viewer.kind === "demo";
+  // Assent first. An account that has not accepted the current Terms cannot
+  // reach any surface that shows it data.
+  if (!isDemo && !(await hasAccepted(viewer.appUser.user_id))) redirect("/accept");
   const claims = isDemo ? [] : activeClaims(viewer);
   // A real account with nothing claimed has nothing to show — send it to
   // claim attach rather than render an empty shell.

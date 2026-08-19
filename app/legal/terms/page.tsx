@@ -28,9 +28,11 @@ export default function Terms() {
         Service, you accept these Terms and our Privacy Policy, and you
         consent to transact with us electronically under the U.S. E-SIGN Act
         and the Texas Uniform Electronic Transactions Act. If you do not
-        agree, do not use the Service. We record the date, time, account, and
-        version of the Terms you accept, and that record is conclusive
-        evidence of your acceptance.
+        agree, do not use the Service. Before you can claim a record or view any
+        data, we ask you to tick an unbundled box — never pre-checked —
+        accepting these Terms and our Privacy Policy, and we record your
+        account, the date and time, the version and a hash of the text you
+        accepted, and the IP address and browser you accepted from.
       </p>
 
       <h2>2. What the Service is — and what it is not</h2>

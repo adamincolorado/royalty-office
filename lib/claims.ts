@@ -38,8 +38,11 @@ export async function createClaim(
   // UNIQUE (user_id, owner_id): a double-click or a re-run attaches to the
   // existing claim instead of erroring or duplicating.
   const row = await q1<{ claim_id: string; inserted: boolean }>(
+    // method 'manual': during the beta a person reviews and verifies claims.
+    // Recording 'mail_pin' would put a false statement in the audit trail —
+    // no PIN is mailed, because nothing mails one yet.
     `INSERT INTO app.owner_claims (user_id, owner_id, status, method)
-          VALUES ($1::bigint, $2, 'pending', 'mail_pin')
+          VALUES ($1::bigint, $2, 'pending', 'manual')
      ON CONFLICT (user_id, owner_id) DO UPDATE SET user_id = app.owner_claims.user_id
      RETURNING claim_id, (xmax = 0) AS inserted`,
     [appUserId, ownerId],

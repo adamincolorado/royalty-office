@@ -20,7 +20,7 @@ export default function HowItWorks() {
             },
             {
               t: "2. Verify with a mailed code",
-              d: "Cashflow tied to a decimal is financial information, so we verify before we show it. We mail a one-time code to the address the county has on file — the same place your tax statements go. If you've moved, upload a recent check stub instead; the operator, lease, and owner number on it do the same job. Entities and family offices verify with standard documentation.",
+              d: "Cashflow tied to a decimal is financial information, so we verify before we show it. We mail a one-time code to the address the county has on file (mailed by hand during the beta) — the same place your tax statements go. If you've moved, upload a recent check stub instead; the operator, lease, and owner number on it do the same job. Entities and family offices verify with standard documentation.",
             },
             {
               t: "3. Read your wells like a statement",
